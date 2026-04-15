@@ -91,18 +91,19 @@ export default function Hero() {
 
     const revealTl = gsap.timeline({ delay: 1.5 })
 
-    const nameText = name.textContent || ''
-    name.innerHTML = nameText
-      .split('')
+    // Chaque mot dans un conteneur whitespace-nowrap pour éviter les coupures en milieu de mot
+    const words = ['TIFFANY', 'HENGEBAERT']
+    name.innerHTML = words
       .map(
-        (char, i) =>
-          char === ' '
-            ? ' '
-            : `<span class="inline-block opacity-0 translate-y-8" style="animation-delay: ${i * 0.05}s">${char}</span>`
+        (word) =>
+          `<span class="inline-block whitespace-nowrap">${word
+            .split('')
+            .map((char) => `<span class="inline-block opacity-0 translate-y-8">${char}</span>`)
+            .join('')}</span>`
       )
-      .join('')
+      .join(' ')
 
-    revealTl.to(name.querySelectorAll('span'), {
+    revealTl.to(name.querySelectorAll('span span'), {
       opacity: 1,
       y: 0,
       duration: 0.8,
@@ -174,10 +175,9 @@ export default function Hero() {
           <h1
             ref={nameRef}
             className="font-serif leading-[0.95] text-ink mb-4 uppercase text-center block"
-            style={{ fontSize: 'clamp(2.8rem, 9vw, 130px)' }}
+            style={{ fontSize: 'clamp(1.6rem, 8vw, 130px)' }}
           >
-            TIFFANY<br className="sm:hidden" />
-            {' '}HENGEBAERT
+            TIFFANY HENGEBAERT
           </h1>
 
           <p
