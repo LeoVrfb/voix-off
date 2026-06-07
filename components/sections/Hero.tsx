@@ -1,154 +1,120 @@
 'use client'
 
-import { useEffect, useRef, useCallback, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Play, Pause } from 'lucide-react'
+import Image from 'next/image'
+import VoiceWave from '@/components/ui/VoiceWave'
 
 gsap.registerPlugin(ScrollTrigger)
 
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const contentRef = useRef<HTMLDivElement>(null)
+  const portraitRef = useRef<HTMLDivElement>(null)
   const nameRef = useRef<HTMLHeadingElement>(null)
   const subtitleRef = useRef<HTMLParagraphElement>(null)
-  const playerRef = useRef<HTMLDivElement>(null)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const animationFrameRef = useRef<number | undefined>(undefined)
-  const scrollProgressRef = useRef(0)
-  const barsRef = useRef<number[]>([])
-
-  useEffect(() => {
-    const barCount = 80
-    barsRef.current = new Array(barCount).fill(0).map(() => Math.random() * 0.3 + 0.1)
-  }, [])
-
-  const drawWaveform = useCallback(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    const dpr = window.devicePixelRatio || 1
-    const rect = canvas.getBoundingClientRect()
-
-    canvas.width = rect.width * dpr
-    canvas.height = rect.height * dpr
-    ctx.scale(dpr, dpr)
-
-    const width = rect.width
-    const height = rect.height
-    const centerY = height / 2
-    const barCount = barsRef.current.length
-    const barWidth = (width / barCount) * 0.6
-    const gap = (width / barCount) * 0.4
-
-    ctx.clearRect(0, 0, width, height)
-
-    const intensity = scrollProgressRef.current
-    const time = Date.now() * 0.002
-
-    barsRef.current.forEach((baseHeight, i) => {
-      const wave1 = Math.sin(time + i * 0.15) * 0.5 + 0.5
-      const wave2 = Math.sin(time * 1.5 + i * 0.1) * 0.5 + 0.5
-      const noise = Math.sin(time * 0.5 + i * 0.3 + Math.sin(time + i * 0.2)) * 0.5 + 0.5
-
-      const combinedWave = wave1 * 0.4 + wave2 * 0.3 + noise * 0.3
-      const barHeight =
-        baseHeight * height * 0.4 * (0.3 + combinedWave * 0.7 * (0.5 + intensity * 0.5))
-
-      const x = i * (barWidth + gap) + gap / 2
-
-      const grayValue = Math.floor(209 - intensity * 58)
-      ctx.fillStyle = `rgb(${grayValue}, ${grayValue - 3}, ${grayValue - 7})`
-
-      const barY = centerY - barHeight / 2
-      ctx.fillRect(x, barY, barWidth, barHeight)
-    })
-
-    animationFrameRef.current = requestAnimationFrame(drawWaveform)
-  }, [])
-
-  useEffect(() => {
-    drawWaveform()
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current)
-      }
-    }
-  }, [drawWaveform])
+  const taglineRef = useRef<HTMLDivElement>(null)
+  const quoteRef = useRef<HTMLParagraphElement>(null)
+  const ctaPrimaryRef = useRef<HTMLButtonElement>(null)
+  const ctaSecondaryRef = useRef<HTMLButtonElement>(null)
+  const waveRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const section = sectionRef.current
-    const content = contentRef.current
     const name = nameRef.current
     const subtitle = subtitleRef.current
-    const player = playerRef.current
+    const portrait = portraitRef.current
+    const tagline = taglineRef.current
+    const quote = quoteRef.current
+    const ctaP = ctaPrimaryRef.current
+    const ctaS = ctaSecondaryRef.current
+    const wave = waveRef.current
+    if (!section || !name || !subtitle || !portrait || !tagline || !quote || !ctaP || !ctaS || !wave) return
 
-    if (!section || !content || !name || !subtitle || !player) return
-
-    const revealTl = gsap.timeline({ delay: 1.5 })
-
-    // Chaque mot dans un conteneur whitespace-nowrap pour éviter les coupures en milieu de mot
-    const words = ['TIFFANY', 'HENGEBAERT']
+    // ─── Reveal initial ────────────────────────────────────────────
+    const words = ['TIFFANY', 'VOIX OFF']
     name.innerHTML = words
       .map(
         (word) =>
-          `<span class="inline-block whitespace-nowrap">${word
+          `<span class="inline-block whitespace-nowrap mr-[0.18em] last:mr-0">${word
             .split('')
-            .map((char) => `<span class="inline-block opacity-0 translate-y-8">${char}</span>`)
+            .map(
+              (char) =>
+                `<span class="inline-block opacity-0 translate-y-8" style="filter: blur(10px)">${
+                  char === ' ' ? '&nbsp;' : char
+                }</span>`
+            )
             .join('')}</span>`
       )
       .join(' ')
 
-    revealTl.to(name.querySelectorAll('span span'), {
-      opacity: 1,
-      y: 0,
-      duration: 0.8,
-      stagger: 0.03,
-      ease: 'power4.out',
-    })
+    const intro = gsap.timeline({ delay: 1.3 })
 
-    revealTl.fromTo(
+    intro.fromTo(
+      portrait,
+      { opacity: 0, scale: 1.05, y: 20 },
+      { opacity: 1, scale: 1, y: 0, duration: 1.1, ease: 'power3.out' }
+    )
+
+    intro.to(
+      name.querySelectorAll('span span'),
+      { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.9, stagger: 0.025, ease: 'power4.out' },
+      '-=0.85'
+    )
+
+    intro.fromTo(
       subtitle,
-      { opacity: 0, y: 20 },
+      { opacity: 0, y: 14, filter: 'blur(6px)' },
+      { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.7, ease: 'power3.out' },
+      '-=0.5'
+    )
+
+    intro.fromTo(
+      tagline,
+      { opacity: 0, y: 10 },
       { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' },
       '-=0.4'
     )
 
-    revealTl.fromTo(
-      player,
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' },
-      '-=0.3'
-    )
+    // ─── Dispersion au scroll ──────────────────────────────────────
+    // Chaque élément part dans une direction différente. Mobile : tout part
+    // vers le bas avec décalage; desktop : vraie dispersion multi-directionnelle.
+    const isMobile = window.matchMedia('(max-width: 768px)').matches
 
-    const scrollTl = gsap.timeline({
+    const dispersion = gsap.timeline({
       scrollTrigger: {
         trigger: section,
         start: 'top top',
-        end: '+=30%',
-        pin: true,
-        scrub: 0.3,
-        onUpdate: (self) => {
-          scrollProgressRef.current = self.progress
-        },
+        end: 'bottom top',
+        scrub: 0.6,
       },
     })
 
-    scrollTl.to(
-      content,
-      {
-        opacity: 0,
-        scale: 0.95,
-        ease: 'none',
-      },
-      0
-    )
+    if (isMobile) {
+      // Mobile : effet souffle vertical, opacités/blur décalés
+      dispersion
+        .to(portrait, { y: -80, scale: 0.85, opacity: 0, filter: 'blur(6px)', ease: 'none' }, 0)
+        .to(subtitle, { y: -40, opacity: 0, ease: 'none' }, 0)
+        .to(name, { y: -60, scale: 0.92, opacity: 0, filter: 'blur(4px)', ease: 'none' }, 0.05)
+        .to(quote, { y: 30, opacity: 0, ease: 'none' }, 0)
+        .to(ctaP, { y: 60, opacity: 0, ease: 'none' }, 0)
+        .to(ctaS, { y: 80, opacity: 0, ease: 'none' }, 0.05)
+        .to(wave, { y: 30, opacity: 0.3, ease: 'none' }, 0)
+    } else {
+      // Desktop : dispersion en croix
+      dispersion
+        .to(portrait, { x: -180, y: -40, rotation: -3, scale: 0.9, opacity: 0, filter: 'blur(4px)', ease: 'none' }, 0)
+        .to(subtitle, { y: -80, opacity: 0, ease: 'none' }, 0)
+        .to(name, { y: -120, scale: 0.95, opacity: 0, filter: 'blur(6px)', ease: 'none' }, 0.05)
+        .to(quote, { x: 100, opacity: 0, ease: 'none' }, 0)
+        .to(ctaP, { x: -80, y: 60, opacity: 0, ease: 'none' }, 0)
+        .to(ctaS, { x: 80, y: 60, opacity: 0, ease: 'none' }, 0)
+        .to(wave, { y: 40, opacity: 0.4, ease: 'none' }, 0)
+    }
 
     return () => {
+      intro.kill()
+      dispersion.kill()
       ScrollTrigger.getAll().forEach((st) => {
         if (st.vars.trigger === section) st.kill()
       })
@@ -159,95 +125,98 @@ export default function Hero() {
     <section
       ref={sectionRef}
       id="hero"
-      className="relative h-screen w-full overflow-x-hidden overflow-y-hidden bg-cream"
+      className="relative w-full overflow-hidden bg-studio min-h-[640px] h-[100svh] flex flex-col"
     >
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full"
-        style={{ opacity: 0.6 }}
+      {/* Halos colores en arriere-plan — restent souples */}
+      <div className="absolute -top-40 -left-32 w-[40rem] h-[40rem] rounded-full bg-lavender/15 blur-[120px] pointer-events-none animate-glow-pulse" />
+      <div
+        className="absolute -bottom-32 -right-24 w-[36rem] h-[36rem] rounded-full bg-raspberry/15 blur-[120px] pointer-events-none animate-glow-pulse"
+        style={{ animationDelay: '2s' }}
       />
 
+      {/* Grain studio */}
       <div
-        ref={contentRef}
-        className="relative z-10 h-full flex flex-col justify-center"
-      >
-        <div className="w-full text-center">
-          <h1
-            ref={nameRef}
-            className="font-serif leading-[0.95] text-ink mb-4 uppercase text-center block"
-            style={{ fontSize: 'clamp(1.6rem, 8vw, 130px)' }}
-          >
-            TIFFANY HENGEBAERT
-          </h1>
+        className="absolute inset-0 opacity-[0.06] mix-blend-soft-light pointer-events-none"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+        }}
+      />
 
+      {/* Contenu principal — flex-1, peut shrink, centre verticalement */}
+      <div className="relative z-10 flex-1 min-h-0 grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-12 items-center px-5 sm:px-6 md:px-12 lg:px-20 pt-24 md:pt-28 pb-6 md:pb-10">
+        {/* Portrait */}
+        <div className="md:col-span-5 lg:col-span-4 flex justify-center md:justify-end">
+          <div ref={portraitRef} className="relative opacity-0">
+            {/* Halos de la photo */}
+            <div className="absolute -inset-4 rounded-[2.5rem] bg-gradient-to-br from-raspberry/35 via-transparent to-lavender/30 blur-2xl pointer-events-none" />
+            <div className="absolute -inset-1 rounded-[2rem] bg-gradient-to-br from-peach/40 to-cream/10 pointer-events-none" />
+
+            <div className="relative w-[140px] h-[185px] sm:w-[180px] sm:h-[240px] md:w-[230px] md:h-[300px] lg:w-[280px] lg:h-[370px] rounded-[1.5rem] sm:rounded-[1.75rem] overflow-hidden shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] ring-1 ring-cream/15">
+              <Image
+                src="/profil-Tiffany.png"
+                alt="Tiffany — Comédienne voix off"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 40vw, 30vw"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-studio/40 via-transparent to-transparent" />
+            </div>
+
+            <div className="absolute -bottom-2 -right-2 sm:-bottom-3 sm:-right-3 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-raspberry shadow-[0_0_30px_rgba(203,118,158,0.7)]" />
+          </div>
+        </div>
+
+        {/* Texte */}
+        <div className="md:col-span-7 lg:col-span-8 text-center md:text-left">
           <p
             ref={subtitleRef}
-            className="font-sans text-xs md:text-sm tracking-[0.4em] uppercase text-charcoal mb-12 opacity-0"
+            className="font-sans text-[10px] sm:text-xs font-medium tracking-[0.4em] sm:tracking-[0.45em] uppercase text-cream/80 mb-3 sm:mb-5 opacity-0"
           >
-            Comédienne de voix
+            <span className="text-raspberry">●</span> Comédienne · Narratrice · Voix off
           </p>
 
-          <div
-            ref={playerRef}
-            className="inline-flex items-center gap-4 bg-paper/80 backdrop-blur-sm px-6 py-4 rounded-sm shadow-sm border border-border/50 opacity-0"
+          <h1
+            ref={nameRef}
+            className="font-serif leading-[0.92] text-cream uppercase tracking-[-0.01em]"
+            style={{ fontSize: 'clamp(1.9rem, 8vw, 8rem)' }}
           >
-            <button
-              onClick={() => setIsPlaying(!isPlaying)}
-              className="w-12 h-12 rounded-full bg-ink text-cream flex items-center justify-center hover:bg-ink/90 transition-all duration-300 hover:scale-105 cursor-pointer"
-              aria-label={isPlaying ? 'Pause' : 'Lecture'}
-            >
-              {isPlaying ? <Pause size={18} /> : <Play size={18} className="ml-0.5" />}
-            </button>
-            <div className="text-left">
-              <p className="font-sans text-xs tracking-wider uppercase text-charcoal">
-                Démo récente
-              </p>
-              <p className="font-serif text-lg text-ink">&ldquo;L&apos;Essentiel&rdquo;</p>
-            </div>
-            <div className="hidden sm:flex items-center gap-1 ml-4">
-              {[...Array(5)].map((_, i) => (
-                <div
-                  key={i}
-                  className={`w-1 bg-ink/30 rounded-full transition-all duration-300 ${
-                    isPlaying ? 'animate-pulse' : ''
-                  }`}
-                  style={{
-                    height: `${12 + i * 4}px`,
-                    animationDelay: `${i * 0.1}s`,
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
+            TIFFANY VOIX OFF
+          </h1>
 
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3">
-          <span className="font-sans text-[9px] tracking-[0.35em] uppercase text-charcoal/65">
-            Défiler
-          </span>
-          {/* Chevron animé — rebondit en boucle */}
-          <div className="flex flex-col items-center gap-1">
-            {[0, 1].map((i) => (
-              <svg
-                key={i}
-                width="16"
-                height="9"
-                viewBox="0 0 16 9"
-                fill="none"
-                className="animate-bounce-chevron text-ink/50"
-                style={{ animationDelay: `${i * 0.18}s`, opacity: 1 - i * 0.4 }}
+          <div ref={taglineRef} className="mt-3 sm:mt-5 md:mt-7 opacity-0">
+            <p
+              ref={quoteRef}
+              className="font-serif italic text-cream/90 text-sm sm:text-lg md:text-2xl text-balance max-w-xl mx-auto md:mx-0"
+            >
+              « Donner souffle aux mots, du roman intime au spot qui claque. »
+            </p>
+            <div className="mt-4 sm:mt-5 md:mt-6 flex justify-center md:justify-start gap-3 flex-wrap">
+              <button
+                ref={ctaPrimaryRef}
+                onClick={() =>
+                  document.getElementById('livres-audio')?.scrollIntoView({ behavior: 'smooth' })
+                }
+                className="group inline-flex items-center gap-3 px-6 py-3 rounded-full bg-raspberry text-cream font-sans text-xs font-medium tracking-[0.2em] uppercase transition-all duration-300 hover:bg-raspberry/90 hover:scale-[1.02] shadow-[0_10px_30px_-10px_rgba(203,118,158,0.6)]"
               >
-                <path
-                  d="M1 1L8 8L15 1"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            ))}
+                Écouter les démos
+                <span className="inline-block w-0 group-hover:w-3 h-px bg-cream transition-all duration-300" />
+              </button>
+              <button
+                ref={ctaSecondaryRef}
+                onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+                className="inline-flex items-center gap-3 px-6 py-3 rounded-full border border-cream/30 text-cream font-sans text-xs font-medium tracking-[0.2em] uppercase transition-all duration-300 hover:bg-cream/10 hover:border-cream/55"
+              >
+                Me contacter
+              </button>
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* Waveform vocale — style enregistrement en cours, zone dediee en bas */}
+      <div ref={waveRef} className="relative z-0 shrink-0 h-28 sm:h-32 md:h-40 lg:h-44 w-full">
+        <VoiceWave className="absolute inset-0" />
       </div>
     </section>
   )

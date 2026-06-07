@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&display=swap');
 
 @font-face {
   font-family: 'PP Formula';
@@ -41,35 +41,40 @@
   input:focus-visible, textarea:focus-visible { outline: none; box-shadow: none; }
 
   :root {
-    --background: 40 23% 94%;
-    --foreground: 0 0% 10%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 10%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 10%;
-    --primary: 0 0% 10%;
-    --primary-foreground: 40 23% 94%;
-    --secondary: 40 10% 88%;
-    --secondary-foreground: 0 0% 10%;
-    --muted: 40 10% 88%;
-    --muted-foreground: 0 0% 29%;
-    --accent: 38 30% 64%;
-    --accent-foreground: 0 0% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 40 10% 85%;
-    --input: 40 10% 85%;
-    --ring: 0 0% 10%;
+    /* Palette mappée sur HSL pour les composants shadcn */
+    /* studio #393E41 ~ hsl(204 7% 24%) */
+    --background: 204 7% 24%;
+    --foreground: 18 27% 84%;
+    --card: 204 7% 24%;
+    --card-foreground: 18 27% 84%;
+    --popover: 204 7% 24%;
+    --popover-foreground: 18 27% 84%;
+    /* raspberry #CB769E - accent principal */
+    --primary: 330 47% 63%;
+    --primary-foreground: 204 7% 18%;
+    /* peach #EED7C5 */
+    --secondary: 22 53% 85%;
+    --secondary-foreground: 204 7% 24%;
+    --muted: 204 6% 32%;
+    --muted-foreground: 18 18% 78%;
+    /* lavender #7681B3 */
+    --accent: 226 28% 58%;
+    --accent-foreground: 204 7% 18%;
+    --destructive: 0 72% 56%;
+    --destructive-foreground: 18 27% 96%;
+    --border: 18 14% 90% / 0.12;
+    --input: 18 14% 90% / 0.18;
+    --ring: 330 47% 63%;
     --radius: 0.25rem;
 
-    --waveform-inactive: #D1CEC7;
-    --waveform-active: #1A1A1A;
+    --waveform-inactive: rgba(238, 226, 223, 0.18);
+    --waveform-active: #CB769E;
   }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: rgba(238, 226, 223, 0.12);
   }
 
   html {
@@ -77,9 +82,12 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', sans-serif;
+    background-color: #393E41;
+    color: #EEE2DF;
+    font-family: 'Inter', 'Suisse Intl', sans-serif;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -95,7 +103,7 @@
   }
 
   .font-sans {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Suisse Intl', 'Inter', sans-serif;
   }
 
   .text-balance {
@@ -113,7 +121,7 @@
   }
 
   .audio-track-row:hover {
-    @apply bg-secondary/50;
+    background-color: rgba(238, 226, 223, 0.05);
   }
 
   .audio-track-row::before {
@@ -123,7 +131,7 @@
     bottom: 0;
     width: 0;
     height: 1px;
-    background: linear-gradient(90deg, #C5A880, transparent);
+    background: linear-gradient(90deg, #CB769E, transparent);
     transition: width 0.5s ease;
   }
 
@@ -132,11 +140,11 @@
   }
 
   .btn-primary {
-    @apply bg-foreground text-background px-8 py-4 font-sans text-sm tracking-wider uppercase transition-all duration-300;
+    @apply bg-raspberry text-cream px-8 py-4 font-sans text-sm tracking-wider uppercase transition-all duration-300;
   }
 
   .btn-primary:hover {
-    @apply bg-foreground/90 scale-105;
+    @apply bg-raspberry/90 scale-[1.02];
   }
 
   .section-padding {
@@ -144,7 +152,15 @@
   }
 
   .input-field {
-    @apply w-full bg-transparent border-b border-border py-3 px-0 font-sans text-base focus:outline-none focus:border-foreground transition-colors placeholder:text-muted-foreground/50;
+    @apply w-full bg-transparent border-b border-cream/15 py-3 px-0 font-sans text-base text-cream placeholder:text-cream/35 focus:outline-none focus:border-raspberry transition-colors;
+  }
+
+  /* Texte avec gradient framboise → lavande pour des accents joyeux */
+  .text-gradient-joy {
+    background: linear-gradient(90deg, #CB769E 0%, #7681B3 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 }
 
@@ -180,17 +196,18 @@ html.lenis body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--waveform-inactive);
+  background: rgba(238, 226, 223, 0.18);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--waveform-active);
+  background: #CB769E;
 }
 
 /* Selection */
 ::selection {
-  background: rgba(26, 26, 26, 0.15);
+  background: rgba(203, 118, 158, 0.35);
+  color: #EEE2DF;
 }
 
 /* Section stacking */
@@ -200,19 +217,19 @@ section {
 
 /* Custom focus styles */
 *:focus-visible {
-  outline: 2px solid #1A1A1A;
+  outline: 2px solid #CB769E;
   outline-offset: 2px;
 }
 
 /* Button/link transitions */
 button,
 a {
-  transition: transform 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+  transition: transform 0.2s ease, color 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
 }
 
 /* Image placeholder */
 img {
-  background-color: #F4F1EA;
+  background-color: rgba(238, 215, 197, 0.08);
 }
 
 /* Prevent text selection on interactive elements */
@@ -224,13 +241,12 @@ button,
 /* Form select styling */
 select.input-field {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.5 4.5L6 8L9.5 4.5' stroke='%234A4A4A' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.5 4.5L6 8L9.5 4.5' stroke='%23EEE2DF' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0 center;
   padding-right: 20px;
 }
 
-/* Textarea styling */
 textarea.input-field {
   min-height: 120px;
 }
@@ -245,7 +261,7 @@ input[type='range'] {
 
 input[type='range']::-webkit-slider-runnable-track {
   height: 4px;
-  background: #E0DDD5;
+  background: rgba(238, 226, 223, 0.18);
   border-radius: 2px;
 }
 
@@ -254,7 +270,7 @@ input[type='range']::-webkit-slider-thumb {
   appearance: none;
   width: 12px;
   height: 12px;
-  background: #1A1A1A;
+  background: #CB769E;
   border-radius: 50%;
   margin-top: -4px;
   transition: transform 0.2s ease;
@@ -262,26 +278,6 @@ input[type='range']::-webkit-slider-thumb {
 
 input[type='range']::-webkit-slider-thumb:hover {
   transform: scale(1.2);
-}
-
-/* Float animation */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-/* Pulse animation for waveform bars */
-@keyframes pulse-bar {
-  0%, 100% {
-    transform: scaleY(1);
-  }
-  50% {
-    transform: scaleY(1.3);
-  }
 }
 
 /* Responsive typography */
@@ -306,7 +302,7 @@ input[type='range']::-webkit-slider-thumb:hover {
   }
 }
 
-/* Print styles */
+/* Print */
 @media print {
   nav,
   .audio-track-row,

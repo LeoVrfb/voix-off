@@ -2,8 +2,9 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Tiffany Hengebaert — Comédienne de voix',
-  description: 'Portfolio de Tiffany Hengebaert — Comédienne de voix. Voix off publicitaire, livres audio, narrations corporate.',
+  title: 'Tiffany Voix Off — Comédienne, narratrice & voix off',
+  description:
+    'Tiffany Voix Off — Comédienne et lectrice. Livres audio, voix off publicitaire, narration corporate, audio guides. Studio à distance partout dans le monde.',
 }
 
 export default function RootLayout({
@@ -13,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr">
-      <body>{children}</body>
+      <body className="bg-studio text-cream">{children}</body>
     </html>
   )
 }

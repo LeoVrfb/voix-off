@@ -20,11 +20,13 @@ const config: Config = {
         ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
-        cream: '#F4F1EA',
-        ink: '#1A1A1A',
-        charcoal: '#4A4A4A',
-        gold: '#C5A880',
-        paper: '#FFFFFF',
+        // Palette Tiffany Voix Off
+        studio: '#393E41',     // noir studio - fond
+        'studio-soft': '#4A5054', // variation plus claire
+        cream: '#EEE2DF',      // beige clair principal (texte)
+        peach: '#EED7C5',      // beige doux secondaire
+        lavender: '#7681B3',   // bleu lavande - accent doux
+        raspberry: '#CB769E',  // rose framboise - accent vif
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
@@ -74,6 +76,14 @@ const config: Config = {
           '0%, 100%': { transform: 'translateY(0)', opacity: '1' },
           '50%': { transform: 'translateY(5px)', opacity: '0.6' },
         },
+        'glow-pulse': {
+          '0%, 100%': { opacity: '0.35' },
+          '50%': { opacity: '0.65' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -82,6 +92,8 @@ const config: Config = {
         float: 'float 3s ease-in-out infinite',
         'wave-flow': 'wave-flow 12s linear infinite',
         'bounce-chevron': 'bounce-chevron 1.4s ease-in-out infinite',
+        'glow-pulse': 'glow-pulse 4s ease-in-out infinite',
+        shimmer: 'shimmer 8s linear infinite',
       },
     },
   },

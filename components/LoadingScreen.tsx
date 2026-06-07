@@ -13,9 +13,7 @@ export default function LoadingScreen() {
 
   useEffect(() => {
     const tl = gsap.timeline({
-      onComplete: () => {
-        setIsLoading(false)
-      },
+      onComplete: () => setIsLoading(false),
     })
 
     tl.to(progressRef.current, {
@@ -26,32 +24,19 @@ export default function LoadingScreen() {
 
     tl.to(
       textRef.current,
-      {
-        opacity: 0,
-        y: -20,
-        duration: 0.4,
-        ease: 'power2.in',
-      },
+      { opacity: 0, y: -20, duration: 0.4, ease: 'power2.in' },
       '+=0.2'
     )
 
     tl.to(
       topCurtainRef.current,
-      {
-        yPercent: -100,
-        duration: 0.8,
-        ease: 'power4.inOut',
-      },
+      { yPercent: -100, duration: 0.8, ease: 'power4.inOut' },
       '-=0.1'
     )
 
     tl.to(
       bottomCurtainRef.current,
-      {
-        yPercent: 100,
-        duration: 0.8,
-        ease: 'power4.inOut',
-      },
+      { yPercent: 100, duration: 0.8, ease: 'power4.inOut' },
       '<'
     )
 
@@ -68,21 +53,27 @@ export default function LoadingScreen() {
     <div ref={containerRef} className="fixed inset-0 z-[100] pointer-events-none">
       <div
         ref={topCurtainRef}
-        className="absolute top-0 left-0 right-0 h-1/2 bg-ink flex items-end justify-center pb-8"
+        className="absolute top-0 left-0 right-0 h-1/2 bg-studio flex items-end justify-center pb-8"
       >
         <div ref={textRef} className="text-center">
-          <p className="text-cream/80 font-sans text-xs tracking-[0.3em] uppercase mb-4">
-            Chargement
+          <p className="text-cream/70 font-sans text-[10px] tracking-[0.4em] uppercase mb-4">
+            Tiffany Voix Off
           </p>
-          <div className="w-48 h-[2px] bg-cream/20 overflow-hidden">
-            <div ref={progressRef} className="h-full bg-cream w-0" />
+          <div className="w-48 h-[2px] bg-cream/15 overflow-hidden">
+            <div
+              ref={progressRef}
+              className="h-full w-0"
+              style={{
+                background: 'linear-gradient(90deg, #CB769E 0%, #7681B3 100%)',
+              }}
+            />
           </div>
         </div>
       </div>
 
       <div
         ref={bottomCurtainRef}
-        className="absolute bottom-0 left-0 right-0 h-1/2 bg-ink"
+        className="absolute bottom-0 left-0 right-0 h-1/2 bg-studio"
       />
     </div>
   )
