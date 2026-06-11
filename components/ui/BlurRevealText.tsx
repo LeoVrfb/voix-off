@@ -41,9 +41,9 @@ export default function BlurRevealText({
             ease: 'easeOut',
           }}
           className="inline-block"
-          style={{ whiteSpace: unit === ' ' || mode === 'word' ? undefined : 'pre' }}
+          style={{ whiteSpace: 'pre' }}
         >
-          {unit}
+          {mode === 'char' && unit === ' ' ? '\u00A0' : unit}
           {mode === 'word' && i < units.length - 1 ? '\u00A0' : ''}
         </motion.span>
       ))}

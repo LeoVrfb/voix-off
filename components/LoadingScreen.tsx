@@ -64,7 +64,7 @@ export default function LoadingScreen() {
               ref={progressRef}
               className="h-full w-0"
               style={{
-                background: 'linear-gradient(90deg, #CB769E 0%, #7681B3 100%)',
+                background: 'linear-gradient(90deg, #C2803F 0%, #7E848C 100%)',
               }}
             />
           </div>

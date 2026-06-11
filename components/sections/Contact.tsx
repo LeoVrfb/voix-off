@@ -86,18 +86,11 @@ export default function Contact() {
       <div className="relative z-10 max-w-6xl mx-auto section-padding">
         {/* Entête */}
         <div ref={headingRef} className="mb-16 md:mb-20 opacity-0 text-center">
-          <div className="inline-flex items-center gap-3 mb-7 px-3 py-1.5 rounded-full bg-raspberry/10 border border-raspberry/25">
-            <span className="w-1.5 h-1.5 rounded-full bg-raspberry" />
-            <p className="font-sans text-[11px] font-semibold tracking-[0.3em] uppercase text-raspberry">
-              Discutons
-            </p>
-          </div>
-          <h2 className="font-serif text-cream leading-[1.05] font-medium text-balance"
-              style={{ fontSize: 'clamp(2.6rem, 8vw, 7rem)' }}>
-            <BlurRevealText text="Travaillons" mode="word" stagger={0.1} duration={0.5} />{' '}
-            <span className="italic font-normal" style={{ color: '#CB769E' }}>
-              <BlurRevealText text="ensemble." mode="word" delay={0.2} stagger={0.1} duration={0.5} />
-            </span>
+          <h2
+            className="font-serif uppercase text-cream leading-[1] tracking-[-0.01em] whitespace-nowrap"
+            style={{ fontSize: 'clamp(1.9rem, 7.5vw, 4.75rem)' }}
+          >
+            <BlurRevealText text="Contact" mode="char" stagger={0.04} duration={0.5} />
           </h2>
         </div>
 
@@ -203,11 +196,11 @@ export default function Contact() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="group inline-flex items-center gap-4 px-7 py-3.5 rounded-full bg-raspberry hover:bg-raspberry/90 text-cream font-sans text-sm font-semibold tracking-[0.2em] uppercase transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-[0_15px_40px_-15px_rgba(203,118,158,0.65)] hover:scale-[1.02]"
+                  className="group inline-flex items-center gap-4 px-7 py-3.5 rounded-full bg-cream hover:bg-cream/90 text-studio font-sans text-sm font-semibold tracking-[0.2em] uppercase transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-[0_15px_40px_-18px_rgba(0,0,0,0.8)] hover:scale-[1.02]"
                 >
                   {isSubmitting ? (
                     <>
-                      <div className="w-4 h-4 border border-cream/40 border-t-cream rounded-full animate-spin" />
+                      <div className="w-4 h-4 border border-studio/30 border-t-studio rounded-full animate-spin" />
                       <span>Envoi en cours…</span>
                     </>
                   ) : (

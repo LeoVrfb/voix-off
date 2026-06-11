@@ -1,69 +1,83 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
+import Image from 'next/image'
 import { Play, Pause, Volume2 } from 'lucide-react'
 
 interface AudioTrack {
   id: string
   title: string
   category: string
-  duration: string
+  src: string
+  cover?: string
+  /** Durée de secours affichée avant chargement des métadonnées */
+  duration?: string
 }
 
 interface AudioPlayerProps {
   tracks: AudioTrack[]
   /** 'audiobook' = livres audio (sobre), 'voiceover' = voix off (vif) */
   variant?: 'audiobook' | 'voiceover'
+  /** Regroupe les pistes par catégorie avec un intitulé fin entre les groupes */
+  grouped?: boolean
 }
 
-export default function AudioPlayer({ tracks, variant = 'audiobook' }: AudioPlayerProps) {
+function formatTime(seconds: number): string {
+  if (!Number.isFinite(seconds)) return '--:--'
+  const m = Math.floor(seconds / 60)
+  const s = Math.floor(seconds % 60)
+  return `${m}:${String(s).padStart(2, '0')}`
+}
+
+export default function AudioPlayer({ tracks, variant = 'audiobook', grouped = false }: AudioPlayerProps) {
   const [currentTrack, setCurrentTrack] = useState<number | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
-  const progressInterval = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [durations, setDurations] = useState<Record<number, string>>({})
+  const audioRefs = useRef<(HTMLAudioElement | null)[]>([])
 
-  const accentHex = variant === 'voiceover' ? '#CB769E' : '#7681B3'
+  const accentHex = variant === 'voiceover' ? '#CFC3AE' : '#B8AE9F'
 
   const handlePlay = (index: number) => {
+    const audio = audioRefs.current[index]
+    if (!audio) return
+
     if (currentTrack === index) {
-      setIsPlaying((p) => !p)
-    } else {
-      setCurrentTrack(index)
-      setIsPlaying(true)
-      setProgress(0)
+      if (isPlaying) {
+        audio.pause()
+        setIsPlaying(false)
+      } else {
+        void audio.play().catch(() => {})
+        setIsPlaying(true)
+      }
+      return
     }
+
+    // Couper la piste précédente
+    if (currentTrack !== null) {
+      const prev = audioRefs.current[currentTrack]
+      if (prev) {
+        prev.pause()
+        prev.currentTime = 0
+      }
+    }
+
+    setCurrentTrack(index)
+    setProgress(0)
+    audio.currentTime = 0
+    void audio.play().catch(() => {})
+    setIsPlaying(true)
   }
 
-  useEffect(() => {
-    if (isPlaying) {
-      progressInterval.current = setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= 100) {
-            setIsPlaying(false)
-            return 0
-          }
-          return prev + 0.4
-        })
-      }, 100)
-    } else if (progressInterval.current) {
-      clearInterval(progressInterval.current)
-    }
-    return () => {
-      if (progressInterval.current) clearInterval(progressInterval.current)
-    }
-  }, [isPlaying])
-
-  return (
-    <div className="w-full space-y-3">
-      {tracks.map((track, index) => {
-        const isActive = currentTrack === index
-        return (
+  const renderTrack = (track: AudioTrack, index: number) => {
+    const isActive = currentTrack === index
+    return (
           <div
             key={track.id}
             className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 ${
               isActive
-                ? 'border-cream/40 bg-cream/[0.07]'
-                : 'border-cream/15 hover:border-cream/30 hover:bg-cream/[0.05]'
+                ? 'border-cream/70 bg-cream/[0.10]'
+                : 'border-cream/40 bg-cream/[0.04] hover:border-cream/65 hover:bg-cream/[0.08]'
             }`}
           >
             {/* Progress background */}
@@ -77,7 +91,54 @@ export default function AudioPlayer({ tracks, variant = 'audiobook' }: AudioPlay
               />
             )}
 
-            <div className="relative flex items-center gap-4 px-5 py-4">
+            {/* Élément audio réel (un par piste, pour garder les durées) */}
+            <audio
+              ref={(el) => {
+                audioRefs.current[index] = el
+              }}
+              src={track.src}
+              preload="metadata"
+              onLoadedMetadata={(e) => {
+                const a = e.currentTarget
+                if (a.duration === Infinity || Number.isNaN(a.duration)) {
+                  // Certains MP3 ne donnent pas la durée tant qu'on n'a pas sondé la fin
+                  const onSeeked = () => {
+                    a.removeEventListener('timeupdate', onSeeked)
+                    const real = a.duration
+                    a.currentTime = 0
+                    setDurations((d) => ({ ...d, [index]: formatTime(real) }))
+                  }
+                  a.addEventListener('timeupdate', onSeeked)
+                  a.currentTime = 1e101
+                } else {
+                  setDurations((d) => ({ ...d, [index]: formatTime(a.duration) }))
+                }
+              }}
+              onTimeUpdate={(e) => {
+                if (currentTrack !== index) return
+                const a = e.currentTarget
+                setProgress(a.duration ? (a.currentTime / a.duration) * 100 : 0)
+              }}
+              onEnded={() => {
+                setIsPlaying(false)
+                setProgress(0)
+              }}
+            />
+
+            <div className="relative flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-4">
+              {/* Pochette / logo — à gauche de chaque enregistrement */}
+              {track.cover && (
+                <div className="relative flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden ring-1 ring-cream/20 bg-studio-soft">
+                  <Image
+                    src={track.cover}
+                    alt={track.title}
+                    fill
+                    className="object-cover"
+                    sizes="56px"
+                  />
+                </div>
+              )}
+
               {/* Play button */}
               <button
                 onClick={() => handlePlay(index)}
@@ -97,8 +158,8 @@ export default function AudioPlayer({ tracks, variant = 'audiobook' }: AudioPlay
               </button>
 
               {/* Mini waveform - deterministic */}
-              <div className="hidden sm:flex items-end gap-[2px] h-7 flex-shrink-0 w-16">
-                {[...Array(14)].map((_, i) => {
+              <div className="hidden lg:flex items-end gap-[2px] h-7 flex-shrink-0 w-14">
+                {[...Array(12)].map((_, i) => {
                   const h = Math.round(25 + Math.abs(Math.sin(i * 0.9 + index * 0.5)) * 70)
                   return (
                     <div
@@ -110,9 +171,7 @@ export default function AudioPlayer({ tracks, variant = 'audiobook' }: AudioPlay
                         height: `${h}%`,
                         animationDelay: `${i * 0.06}s`,
                         backgroundColor:
-                          isActive && isPlaying
-                            ? accentHex
-                            : 'rgba(238, 226, 223, 0.25)',
+                          isActive && isPlaying ? accentHex : 'rgba(238, 226, 223, 0.25)',
                       }}
                     />
                   )
@@ -122,18 +181,20 @@ export default function AudioPlayer({ tracks, variant = 'audiobook' }: AudioPlay
               {/* Track info */}
               <div className="flex-1 min-w-0">
                 <p
-                  className={`font-serif text-base md:text-lg font-medium truncate transition-colors duration-300 ${
+                  className={`font-serif text-base md:text-lg font-medium leading-tight transition-colors duration-300 ${
                     isActive ? 'text-cream' : 'text-cream/95 group-hover:text-cream'
                   }`}
                 >
                   {track.title}
                 </p>
-                <p
-                  className="font-sans text-[10px] font-medium uppercase tracking-[0.2em] mt-1.5"
-                  style={{ color: accentHex }}
-                >
-                  {track.category}
-                </p>
+                {!grouped && (
+                  <p
+                    className="font-sans text-[10px] font-medium uppercase tracking-[0.2em] mt-1.5"
+                    style={{ color: accentHex }}
+                  >
+                    {track.category}
+                  </p>
+                )}
               </div>
 
               {/* Duration / Volume */}
@@ -142,7 +203,7 @@ export default function AudioPlayer({ tracks, variant = 'audiobook' }: AudioPlay
                   <Volume2 className="w-4 h-4 animate-pulse" style={{ color: accentHex }} />
                 )}
                 <span className="font-sans text-xs font-medium text-cream/75 tabular-nums">
-                  {track.duration}
+                  {durations[index] ?? track.duration ?? '--:--'}
                 </span>
               </div>
             </div>
@@ -160,8 +221,35 @@ export default function AudioPlayer({ tracks, variant = 'audiobook' }: AudioPlay
               style={{ backgroundColor: `${accentHex}66` }}
             />
           </div>
-        )
-      })}
+    )
+  }
+
+  // Regroupe les pistes par catégorie en conservant l'index global (refs/état)
+  const groups: { category: string; items: { track: AudioTrack; index: number }[] }[] = []
+  tracks.forEach((track, index) => {
+    const last = groups[groups.length - 1]
+    if (grouped && last && last.category === track.category) {
+      last.items.push({ track, index })
+    } else if (grouped) {
+      groups.push({ category: track.category, items: [{ track, index }] })
+    } else {
+      if (!last) groups.push({ category: '', items: [] })
+      groups[groups.length - 1].items.push({ track, index })
+    }
+  })
+
+  return (
+    <div className={`w-full ${grouped ? 'space-y-7' : 'space-y-3'}`}>
+      {groups.map((group, gi) => (
+        <div key={group.category || `g-${gi}`} className="space-y-3">
+          {grouped && group.category && (
+            <p className="font-sans text-[11px] font-medium uppercase tracking-[0.28em] text-cream/45 pl-1 pb-0.5">
+              {group.category}
+            </p>
+          )}
+          {group.items.map(({ track, index }) => renderTrack(track, index))}
+        </div>
+      ))}
     </div>
   )
 }

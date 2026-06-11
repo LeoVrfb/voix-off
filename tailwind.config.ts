@@ -20,13 +20,13 @@ const config: Config = {
         ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
-        // Palette Tiffany Voix Off
-        studio: '#393E41',     // noir studio - fond
-        'studio-soft': '#4A5054', // variation plus claire
-        cream: '#EEE2DF',      // beige clair principal (texte)
-        peach: '#EED7C5',      // beige doux secondaire
-        lavender: '#7681B3',   // bleu lavande - accent doux
-        raspberry: '#CB769E',  // rose framboise - accent vif
+        // Palette Tiffany Voix Off — monochrome anthracite + neon (shader uniquement)
+        studio: '#130E0A',     // noir anthracite chaud profond - fond
+        'studio-soft': '#221912', // surface plus claire (chaude)
+        cream: '#ECE5DC',      // blanc chaud principal (texte)
+        peach: '#CBB199',      // sable secondaire (decor discret)
+        lavender: '#978F84',   // gris chaud neutre - accent doux
+        raspberry: '#B5AC9E',  // gris chaud clair - accent (plus de rose/orange)
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',

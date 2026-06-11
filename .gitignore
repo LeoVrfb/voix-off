@@ -29,3 +29,9 @@ Thumbs.db
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Médias sources lourds (gardés en local, non versionnés)
+# Photos brutes de test : seules les versions optimisées de public/img/ sont versionnées
+/public/site-photos-voix-off/
+# MP3 d'origine : les versions web (.m4a AAC) sont versionnées
+/public/demos/audio/*.mp3

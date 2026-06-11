@@ -5,9 +5,8 @@ import { Menu, X } from 'lucide-react'
 
 const navItems = [
   { id: 'hero', label: 'Accueil' },
-  { id: 'livres-audio', label: 'Livres audio' },
-  { id: 'voix-off', label: 'Voix off' },
-  { id: 'about', label: 'Qui suis-je' },
+  { id: 'livres-audio', label: 'Mes démos' },
+  { id: 'about', label: 'Qui suis-je ?' },
   { id: 'contact', label: 'Contact' },
 ]
 
@@ -75,8 +74,8 @@ export default function Navigation() {
         <div
           className={`pointer-events-auto flex items-center gap-1 rounded-full border transition-all duration-500 backdrop-blur-xl ${
             scrolled
-              ? 'bg-studio/85 border-cream/15 px-3 py-2 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.4)]'
-              : 'bg-studio/50 border-cream/10 px-4 py-2.5'
+              ? 'bg-studio/95 border-cream/15 px-3 py-2 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.7)]'
+              : 'bg-studio/80 border-cream/12 px-4 py-2.5 shadow-[0_8px_30px_-18px_rgba(0,0,0,0.6)]'
           }`}
         >
           {navItems.map((item) => {
@@ -114,7 +113,7 @@ export default function Navigation() {
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? 'Fermer le menu' : 'Ouvrir le menu'}
         aria-expanded={open}
-        className="md:hidden fixed top-5 right-5 z-[60] w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-xl bg-studio/80 border border-cream/15 text-cream shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] transition-transform active:scale-95"
+        className="md:hidden fixed top-5 right-5 z-[60] w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-xl bg-studio/90 border border-cream/15 text-cream shadow-[0_10px_30px_-10px_rgba(0,0,0,0.7)] transition-transform active:scale-95"
       >
         <span className="relative w-5 h-5 flex items-center justify-center">
           <Menu

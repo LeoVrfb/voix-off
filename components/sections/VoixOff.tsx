@@ -3,7 +3,6 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Mic } from 'lucide-react'
 import AudioPlayer from '@/components/AudioPlayer'
 import BlurRevealText from '@/components/ui/BlurRevealText'
 
@@ -68,30 +67,12 @@ export default function VoixOff() {
             </div>
           </div>
 
-          {/* Colonne droite — titre + intro */}
-          <div className="lg:col-span-5 order-1 lg:order-2 lg:sticky lg:top-32 lg:text-right">
-            <div className="inline-flex items-center gap-3 mb-7 px-3 py-1.5 rounded-full bg-raspberry/10 border border-raspberry/25">
-              <Mic className="w-4 h-4 text-raspberry" strokeWidth={2} />
-              <p className="font-sans text-[11px] font-semibold tracking-[0.3em] uppercase text-raspberry">
-                Quatre démos
-              </p>
-            </div>
-
+          {/* Colonne droite — titre unique */}
+          <div ref={contentRef} className="lg:col-span-5 order-1 lg:order-2 lg:sticky lg:top-32 lg:text-right opacity-0">
             <h2 className="font-serif text-cream leading-[0.95] tracking-tight font-medium"
                 style={{ fontSize: 'clamp(2.4rem, 6.5vw, 6rem)' }}>
-              <BlurRevealText text="Voix" mode="char" stagger={0.06} duration={0.5} />
-              <br />
-              <span className="italic font-normal" style={{ color: '#CB769E' }}>
-                <BlurRevealText text="off" mode="char" stagger={0.08} delay={0.2} duration={0.5} />
-              </span>
+              <BlurRevealText text="Démos · Voix off" mode="char" stagger={0.03} duration={0.5} />
             </h2>
-
-            <div ref={contentRef} className="mt-8 lg:ml-auto max-w-md opacity-0">
-              <p className="font-sans text-base md:text-lg text-cream/90 leading-relaxed">
-                Pubs, films corporate, audio guides, motion design — la même voix, des registres
-                différents. Quatre démos qui montrent l&apos;étendue.
-              </p>
-            </div>
           </div>
         </div>
       </div>

@@ -3,42 +3,52 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { BookOpen } from 'lucide-react'
+import Image from 'next/image'
 import AudioPlayer from '@/components/AudioPlayer'
 import BlurRevealText from '@/components/ui/BlurRevealText'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const tracks = [
-  { id: 'la-1', title: 'Les Liaisons Dangereuses — Extrait', category: 'Roman classique', duration: '2:34' },
-  { id: 'la-2', title: "L'Art de la Simplicité", category: 'Essai', duration: '1:58' },
-  { id: 'la-3', title: 'Le Petit Prince — Chapitre IV', category: 'Jeunesse', duration: '3:12' },
-  { id: 'la-4', title: 'Madame Bovary — Extrait', category: 'Roman', duration: '2:45' },
+const audiobookTracks = [
+  { id: 'la-1', title: '49 jours', category: 'Romans', src: '/demos/audio/49-jours.m4a', cover: '/demos/covers/49-jours.jpg' },
+  { id: 'la-3', title: 'Requiem pour les fantômes', category: 'Romans', src: '/demos/audio/requiem-pour-les-fantomes.m4a', cover: '/demos/covers/requiem-pour-les-fantomes.jpg' },
+  { id: 'la-4', title: 'Le cosmos et nous', category: 'Essais', src: '/demos/audio/le-cosmos-et-nous.m4a', cover: '/demos/covers/le-cosmos-et-nous.jpg' },
+  { id: 'la-2', title: 'Une joie', category: 'Nouvelles', src: '/demos/audio/une-joie.m4a', cover: '/demos/covers/une-joie.jpg' },
+  { id: 'la-5', title: 'Conte pour enfants', category: 'Contes pour enfants', src: '/demos/audio/conte-pour-enfants.m4a', cover: '/demos/covers/conte-pour-enfants.jpg' },
 ]
 
-export default function LivresAudio() {
+const voiceoverTracks = [
+  { id: 'vo-1', title: 'Prada', category: 'Publicité', src: '/demos/audio/prada.m4a', cover: '/demos/covers/prada.jpg' },
+  { id: 'vo-2', title: 'Banque Populaire', category: 'Publicité', src: '/demos/audio/banque-populaire.m4a', cover: '/demos/covers/banque-populaire.png' },
+  { id: 'vo-3', title: 'Top Chef', category: 'Télévision', src: '/demos/audio/top-chef.m4a', cover: '/demos/covers/top-chef.jpg' },
+  { id: 'vo-4', title: 'Carrefour', category: 'Publicité', src: '/demos/audio/carrefour.m4a', cover: '/demos/covers/carrefour.jpg' },
+]
+
+export default function MetsDesMots() {
   const sectionRef = useRef<HTMLElement>(null)
-  const contentRef = useRef<HTMLDivElement>(null)
-  const playerRef = useRef<HTMLDivElement>(null)
+  const headingRef = useRef<HTMLDivElement>(null)
+  const audioRef = useRef<HTMLDivElement>(null)
+  const voixRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const section = sectionRef.current
-    const content = contentRef.current
-    const player = playerRef.current
-
-    if (!section || !content || !player) return
+    const heading = headingRef.current
+    const audio = audioRef.current
+    const voix = voixRef.current
+    if (!section || !heading || !audio || !voix) return
 
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
         start: 'top 80%',
-        end: 'top 25%',
+        end: 'top 20%',
         scrub: 0.5,
       },
     })
 
-    tl.fromTo(content, { opacity: 0, y: 40 }, { opacity: 1, y: 0, ease: 'none' }, 0)
-    tl.fromTo(player, { opacity: 0, y: 60 }, { opacity: 1, y: 0, ease: 'none' }, 0.15)
+    tl.fromTo(heading, { opacity: 0, y: 40 }, { opacity: 1, y: 0, ease: 'none' }, 0)
+    tl.fromTo(audio, { opacity: 0, y: 60 }, { opacity: 1, y: 0, ease: 'none' }, 0.1)
+    tl.fromTo(voix, { opacity: 0, y: 60 }, { opacity: 1, y: 0, ease: 'none' }, 0.2)
 
     return () => {
       ScrollTrigger.getAll().forEach((st) => {
@@ -53,42 +63,50 @@ export default function LivresAudio() {
       id="livres-audio"
       className="relative w-full bg-studio py-24 md:py-32 overflow-hidden"
     >
-      {/* Décor : halo lavande sur ce bloc plus "intime/lecture" */}
-      <div className="absolute top-1/4 -left-32 w-[28rem] h-[28rem] rounded-full bg-lavender/14 blur-[110px] pointer-events-none" />
+      {/* Trait de séparation lumineux en haut */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cream/15 to-transparent" />
 
-      <div className="relative z-10 max-w-6xl mx-auto section-padding">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
-          {/* Colonne gauche — titre + intro */}
-          <div className="lg:col-span-5 lg:sticky lg:top-32">
-            <div className="inline-flex items-center gap-3 mb-7 px-3 py-1.5 rounded-full bg-lavender/10 border border-lavender/25">
-              <BookOpen className="w-4 h-4 text-lavender" strokeWidth={2} />
-              <p className="font-sans text-[11px] font-semibold tracking-[0.3em] uppercase text-lavender">
-                Quatre démos
-              </p>
-            </div>
+      <div className="relative z-10 max-w-7xl mx-auto section-padding">
+        {/* Titre de section — PP Formula */}
+        <div ref={headingRef} className="text-center mb-10 md:mb-14 opacity-0">
+          <h2
+            className="font-display uppercase text-cream leading-[0.9] tracking-tight"
+            style={{ fontSize: 'clamp(3rem, 11vw, 9rem)' }}
+          >
+            <BlurRevealText text="Mes démos" mode="char" stagger={0.04} duration={0.5} />
+          </h2>
+        </div>
 
-            <h2 className="font-serif text-cream leading-[0.95] tracking-tight font-medium"
-                style={{ fontSize: 'clamp(2.4rem, 6.5vw, 6rem)' }}>
-              <BlurRevealText text="Livres" mode="char" stagger={0.05} duration={0.5} />
-              <br />
-              <span className="italic font-normal" style={{ color: '#7681B3' }}>
-                <BlurRevealText text="audio" mode="char" stagger={0.06} delay={0.25} duration={0.5} />
-              </span>
-            </h2>
+        {/* Illustration */}
+        <div className="mb-16 md:mb-20 flex justify-center">
+          <div className="relative w-full max-w-3xl h-[230px] sm:h-[300px] md:h-[380px] overflow-hidden rounded-2xl ring-1 ring-cream/15 shadow-[0_30px_80px_-25px_rgba(0,0,0,0.7)]">
+            <Image
+              src="/img/tiffany-studio.jpg"
+              alt="Tiffany au micro"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 92vw, 768px"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-studio/50 via-transparent to-transparent" />
+          </div>
+        </div>
 
-            <div ref={contentRef} className="mt-8 max-w-md opacity-0">
-              <p className="font-sans text-base md:text-lg text-cream/90 leading-relaxed">
-                Quatre extraits pour entendre comment je m&apos;empare d&apos;un texte — du
-                classique au contemporain, du roman au conte. Mettez les écouteurs.
-              </p>
-            </div>
+        {/* Deux côtés : livre audio / voix off */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-16">
+          <div ref={audioRef} className="opacity-0">
+            <h3 className="font-serif text-cream text-2xl md:text-3xl font-medium mb-6 md:mb-8">
+              Livres audio
+              <span className="block w-12 h-0.5 bg-raspberry/70 rounded-full mt-3" />
+            </h3>
+            <AudioPlayer tracks={audiobookTracks} variant="audiobook" grouped />
           </div>
 
-          {/* Colonne droite — player */}
-          <div className="lg:col-span-7">
-            <div ref={playerRef} className="opacity-0">
-              <AudioPlayer tracks={tracks} variant="audiobook" />
-            </div>
+          <div ref={voixRef} className="opacity-0">
+            <h3 className="font-serif text-cream text-2xl md:text-3xl font-medium mb-6 md:mb-8">
+              Voix off
+              <span className="block w-12 h-0.5 bg-raspberry/70 rounded-full mt-3" />
+            </h3>
+            <AudioPlayer tracks={voiceoverTracks} variant="voiceover" />
           </div>
         </div>
       </div>
