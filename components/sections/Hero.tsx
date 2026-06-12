@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Image from 'next/image'
@@ -18,6 +18,30 @@ export default function Hero() {
   const ctaPrimaryRef = useRef<HTMLButtonElement>(null)
   const ctaSecondaryRef = useRef<HTMLButtonElement>(null)
   const waveRef = useRef<HTMLDivElement>(null)
+
+  // Champ d'interaction des ondes par taille d'écran (haut/bas en unités shader).
+  // Mesures calées au drag-and-drop par device. Voir tableau dans le commentaire
+  // du bloc <ShaderBackground/> plus bas.
+  const [waveField, setWaveField] = useState({ top: 2.2, bottom: -2.2 })
+  useEffect(() => {
+    const compute = () => {
+      const w = window.innerWidth
+      let f: { top: number; bottom: number }
+      if (w < 400) f = { top: 3.7, bottom: -1.75 } // iPhone SE / petits téléphones
+      else if (w < 768) f = { top: 6.4, bottom: -2.75 } // iPhone XR / grands téléphones
+      else if (w < 820) f = { top: 4.3, bottom: -2.2 } // iPad mini
+      else if (w < 1030) f = { top: 5.5, bottom: -2.2 } // iPad Air / Pro (portrait)
+      else if (w < 1600) f = { top: 2.04, bottom: -1.27 } // laptop 13" (Mac full HD)
+      else if (w < 2200) f = { top: 1.85, bottom: -1.68 } // 27" HD (1920)
+      else f = { top: 2.75, bottom: -1.68 } // 27" 2K / 4K (≥ 2560)
+      setWaveField((prev) =>
+        prev.top === f.top && prev.bottom === f.bottom ? prev : f
+      )
+    }
+    compute()
+    window.addEventListener('resize', compute)
+    return () => window.removeEventListener('resize', compute)
+  }, [])
 
   useEffect(() => {
     const section = sectionRef.current
@@ -158,14 +182,13 @@ export default function Hero() {
           créent pas de scroll horizontal, tout en laissant les ondes déborder
           librement hors de la section vers le bas. */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Image de fond — studio, tout au fond */}
-        <Image
-          src="/bg-tiffany-voix-off.png"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-center pointer-events-none select-none"
+        {/* Image de fond — responsive ART-DIRECTED via background-image CSS :
+            le navigateur ne charge QUE le fond correspondant au breakpoint.
+            < 768px        : téléphone (portrait)
+            768 → 1029px   : iPad (portrait, iPad Pro 1024 inclus)
+            ≥ 1030px       : desktop (paysage) */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-[url('/img/bg-phone.jpg')] md:bg-[url('/img/bg-ipad.jpg')] min-[1030px]:bg-[url('/img/bg-desktop.jpg')]"
         />
 
         {/* Halos colores en arriere-plan — restent souples */}
@@ -188,8 +211,8 @@ export default function Hero() {
           (absolute inset-0 + flex items-center). Les ondes sont passées en
           fond absolu (bottom), donc le bloc photo+texte+boutons est vraiment
           au milieu de l'image. */}
-      <div className="absolute inset-0 z-10 flex items-center">
-        <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-12 items-center px-5 sm:px-6 md:px-10 lg:pl-24 lg:pr-10 pb-[18vh] sm:pb-[14vh] md:pb-0">
+      <div className="absolute inset-0 z-10 flex items-start md:items-center pointer-events-none">
+        <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-12 items-center px-5 sm:px-6 md:px-10 lg:pl-24 lg:pr-10 pt-[12vh] pb-[8vh] sm:pt-[10vh] sm:pb-[8vh] md:pt-0 md:pb-0">
         {/* Portrait */}
         <div className="md:col-span-5 lg:col-span-5 flex justify-center md:justify-end">
           <div ref={portraitRef} className="relative">
@@ -242,7 +265,7 @@ export default function Hero() {
                 onClick={() =>
                   document.getElementById('livres-audio')?.scrollIntoView({ behavior: 'smooth' })
                 }
-                className="group inline-flex items-center gap-3 px-6 py-3 rounded-full bg-studio text-cream border border-cream/25 font-sans text-xs font-medium tracking-[0.2em] uppercase transition-all duration-300 hover:bg-studio hover:border-cream/45 hover:scale-[1.02] shadow-[0_10px_30px_-14px_rgba(0,0,0,0.8)]"
+                className="group pointer-events-auto inline-flex items-center gap-3 px-6 py-3 rounded-full bg-studio text-cream border border-cream/25 font-sans text-xs font-medium tracking-[0.2em] uppercase transition-all duration-300 hover:bg-studio hover:border-cream/45 hover:scale-[1.02] shadow-[0_10px_30px_-14px_rgba(0,0,0,0.8)]"
               >
                 Écouter mes démos
                 <span className="inline-block w-0 group-hover:w-3 h-px bg-cream transition-all duration-300" />
@@ -250,7 +273,7 @@ export default function Hero() {
               <button
                 ref={ctaSecondaryRef}
                 onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-                className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-cream text-studio font-sans text-xs font-medium tracking-[0.2em] uppercase transition-all duration-300 hover:bg-cream/90 hover:scale-[1.02] shadow-[0_10px_30px_-12px_rgba(0,0,0,0.7)]"
+                className="pointer-events-auto inline-flex items-center gap-3 px-6 py-3 rounded-full bg-cream text-studio font-sans text-xs font-medium tracking-[0.2em] uppercase transition-all duration-300 hover:bg-cream/90 hover:scale-[1.02] shadow-[0_10px_30px_-12px_rgba(0,0,0,0.7)]"
               >
                 Me contacter
               </button>
@@ -260,18 +283,26 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Ondes plasma — version ORIGINALE (mouvement libre), lignes violettes,
-          fond supprimé (transparent). Le canvas est volontairement BEAUCOUP plus
-          grand que le viewport et centré sur la ligne d'ancrage voulue (basse).
-          La section n'a plus d'overflow-hidden : les ondes débordent donc vers
-          le bas, par-dessus le fond de la section suivante (même bg-studio, z
-          inférieur), et restent derrière son contenu (z-10). Elles ne sont plus
-          tranchées à la frontière entre les deux sections. */}
+      {/* Ondes plasma — mouvement libre d'origine, lignes violettes, fond
+          transparent. Le canvas est volontairement très grand (jamais de coupure
+          par un bord), et centré sur la ligne d'ancrage : ici h-[160vh] avec
+          bottom-[-80vh] => le centre (points d'ancrage gauche/droite) tombe
+          PILE à la frontière hero / section suivante. La section hero n'a plus
+          d'overflow-hidden : les ondes débordent librement au-dessus comme en
+          dessous. Le champ d'interaction est borné par fieldHalf (réduit) — sans
+          coupure : on resserre juste l'amplitude. showField affiche les bordures
+          rouges de calage en haut/bas du champ. */}
       <div
         ref={waveRef}
-        className="absolute bottom-[-56vh] left-0 right-0 h-[160vh] z-[5] pointer-events-none"
+        className="absolute bottom-[-80vh] left-0 right-0 h-[160vh] z-[5] pointer-events-none"
       >
-        <ShaderBackground className="absolute inset-0 h-full w-full" />
+        <ShaderBackground
+          className="absolute inset-0 h-full w-full"
+          fieldTop={waveField.top}
+          fieldBottom={waveField.bottom}
+          showField
+          interactive
+        />
       </div>
     </section>
   )
