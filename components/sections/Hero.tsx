@@ -300,8 +300,6 @@ export default function Hero() {
           className="absolute inset-0 h-full w-full"
           fieldTop={waveField.top}
           fieldBottom={waveField.bottom}
-          showField
-          interactive
         />
       </div>
     </section>
