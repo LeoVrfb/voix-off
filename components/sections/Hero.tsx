@@ -151,32 +151,38 @@ export default function Hero() {
     <section
       ref={sectionRef}
       id="hero"
-      className="relative w-full overflow-hidden bg-studio min-h-[640px] h-[100svh]"
+      className="relative w-full bg-studio min-h-[640px] h-[100svh]"
     >
-      {/* Image de fond — studio, tout au fond (sous halos, grain, contenu, ondes) */}
-      <Image
-        src="/bg-tiffany-voix-off.png"
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className="object-cover object-center pointer-events-none select-none"
-      />
+      {/* Calque décoratif CLIPPÉ (fond studio, halos, grain). On le clippe ici —
+          et PAS la section entière — pour que les halos en position négative ne
+          créent pas de scroll horizontal, tout en laissant les ondes déborder
+          librement hors de la section vers le bas. */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Image de fond — studio, tout au fond */}
+        <Image
+          src="/bg-tiffany-voix-off.png"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center pointer-events-none select-none"
+        />
 
-      {/* Halos colores en arriere-plan — restent souples */}
-      <div className="absolute -top-40 -left-32 w-[40rem] h-[40rem] rounded-full bg-lavender/15 blur-[120px] pointer-events-none animate-glow-pulse" />
-      <div
-        className="absolute -bottom-32 -right-24 w-[36rem] h-[36rem] rounded-full bg-raspberry/15 blur-[120px] pointer-events-none animate-glow-pulse"
-        style={{ animationDelay: '2s' }}
-      />
+        {/* Halos colores en arriere-plan — restent souples */}
+        <div className="absolute -top-40 -left-32 w-[40rem] h-[40rem] rounded-full bg-lavender/15 blur-[120px] animate-glow-pulse" />
+        <div
+          className="absolute -bottom-32 -right-24 w-[36rem] h-[36rem] rounded-full bg-raspberry/15 blur-[120px] animate-glow-pulse"
+          style={{ animationDelay: '2s' }}
+        />
 
-      {/* Grain studio */}
-      <div
-        className="absolute inset-0 opacity-[0.06] mix-blend-soft-light pointer-events-none"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-        }}
-      />
+        {/* Grain studio */}
+        <div
+          className="absolute inset-0 opacity-[0.06] mix-blend-soft-light"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+          }}
+        />
+      </div>
 
       {/* Contenu principal — centré verticalement ET horizontalement sur l'image
           (absolute inset-0 + flex items-center). Les ondes sont passées en
@@ -254,19 +260,18 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Cadre ondes — bande basse en fond absolu (sous le contenu, z-[1]).
-          Hauteur bornée ; le shader garde les courbes dans le cadre,
-          overflow-hidden empêche tout débordement. */}
+      {/* Ondes plasma — version ORIGINALE (mouvement libre), lignes violettes,
+          fond supprimé (transparent). Le canvas est volontairement BEAUCOUP plus
+          grand que le viewport et centré sur la ligne d'ancrage voulue (basse).
+          La section n'a plus d'overflow-hidden : les ondes débordent donc vers
+          le bas, par-dessus le fond de la section suivante (même bg-studio, z
+          inférieur), et restent derrière son contenu (z-10). Elles ne sont plus
+          tranchées à la frontière entre les deux sections. */}
       <div
         ref={waveRef}
-        className="absolute bottom-0 left-0 right-0 z-[1] overflow-hidden pointer-events-none h-[20vh] min-h-[120px] max-h-[280px] sm:h-[24vh] md:h-[28vh]"
+        className="absolute bottom-[-56vh] left-0 right-0 h-[160vh] z-[5] pointer-events-none"
       >
-        <ShaderBackground
-          className="absolute inset-0 h-full w-full"
-          verticalExtent={5.5}
-          speed={1.7}
-          colors={['#00E5FF', '#FF2BD6', '#9D4EFF']}
-        />
+        <ShaderBackground className="absolute inset-0 h-full w-full" />
       </div>
     </section>
   )
