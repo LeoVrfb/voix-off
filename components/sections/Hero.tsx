@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Image from 'next/image'
@@ -18,30 +18,6 @@ export default function Hero() {
   const ctaPrimaryRef = useRef<HTMLButtonElement>(null)
   const ctaSecondaryRef = useRef<HTMLButtonElement>(null)
   const waveRef = useRef<HTMLDivElement>(null)
-
-  // Champ d'interaction des ondes par taille d'écran (haut/bas en unités shader).
-  // Mesures calées au drag-and-drop par device. Voir tableau dans le commentaire
-  // du bloc <ShaderBackground/> plus bas.
-  const [waveField, setWaveField] = useState({ top: 2.2, bottom: -2.2 })
-  useEffect(() => {
-    const compute = () => {
-      const w = window.innerWidth
-      let f: { top: number; bottom: number }
-      if (w < 400) f = { top: 3.7, bottom: -1.75 } // iPhone SE / petits téléphones
-      else if (w < 768) f = { top: 6.4, bottom: -2.75 } // iPhone XR / grands téléphones
-      else if (w < 820) f = { top: 4.3, bottom: -2.2 } // iPad mini
-      else if (w < 1030) f = { top: 5.5, bottom: -2.2 } // iPad Air / Pro (portrait)
-      else if (w < 1600) f = { top: 2.04, bottom: -1.27 } // laptop 13" (Mac full HD)
-      else if (w < 2200) f = { top: 1.85, bottom: -1.68 } // 27" HD (1920)
-      else f = { top: 2.75, bottom: -1.68 } // 27" 2K / 4K (≥ 2560)
-      setWaveField((prev) =>
-        prev.top === f.top && prev.bottom === f.bottom ? prev : f
-      )
-    }
-    compute()
-    window.addEventListener('resize', compute)
-    return () => window.removeEventListener('resize', compute)
-  }, [])
 
   useEffect(() => {
     const section = sectionRef.current
@@ -222,7 +198,7 @@ export default function Hero() {
 
             <div
               ref={frameRef}
-              className="relative w-[190px] h-[250px] sm:w-[230px] sm:h-[305px] md:w-[330px] md:h-[440px] lg:w-[380px] lg:h-[500px] overflow-hidden shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] ring-1 ring-cream/15"
+              className="relative w-[190px] h-[250px] sm:w-[230px] sm:h-[305px] md:w-[270px] md:h-[360px] lg:w-[380px] lg:h-[500px] overflow-hidden shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] ring-1 ring-cream/15"
             >
               <Image
                 src="/img/tiffany-hero.jpg"
@@ -253,8 +229,8 @@ export default function Hero() {
           >
             <span className="text-cream text-[0.7em] leading-none translate-y-[-0.1em]">●</span>
             <span className="text-left">
-              Narratrice de livre audio ·<br />
-              Comédienne voix off
+              Narration de livres audio ·<br />
+              Voix off
             </span>
           </p>
 
@@ -283,23 +259,19 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Ondes plasma — mouvement libre d'origine, lignes violettes, fond
-          transparent. Le canvas est volontairement très grand (jamais de coupure
-          par un bord), et centré sur la ligne d'ancrage : ici h-[160vh] avec
-          bottom-[-80vh] => le centre (points d'ancrage gauche/droite) tombe
-          PILE à la frontière hero / section suivante. La section hero n'a plus
-          d'overflow-hidden : les ondes débordent librement au-dessus comme en
-          dessous. Le champ d'interaction est borné par fieldHalf (réduit) — sans
-          coupure : on resserre juste l'amplitude. showField affiche les bordures
-          rouges de calage en haut/bas du champ. */}
+      {/* Cadre ondes — bande basse en fond absolu (sous le contenu, z-[1]).
+          Hauteur bornée ; le shader garde les courbes dans le cadre,
+          overflow-hidden empêche tout débordement. (Version main : positionnement
+          responsive bien géré + palette multicolore.) */}
       <div
         ref={waveRef}
-        className="absolute bottom-[-80vh] left-0 right-0 h-[160vh] z-[5] pointer-events-none"
+        className="absolute bottom-0 left-0 right-0 z-[1] overflow-hidden pointer-events-none h-[20vh] min-h-[120px] max-h-[280px] sm:h-[24vh] md:h-[28vh]"
       >
         <ShaderBackground
           className="absolute inset-0 h-full w-full"
-          fieldTop={waveField.top}
-          fieldBottom={waveField.bottom}
+          verticalExtent={5.5}
+          speed={1.7}
+          colors={['#00E5FF', '#FF2BD6', '#9D4EFF']}
         />
       </div>
     </section>

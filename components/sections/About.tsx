@@ -49,54 +49,18 @@ export default function About() {
       <div className="absolute top-20 -left-32 w-[28rem] h-[28rem] rounded-full bg-lavender/12 blur-[100px] pointer-events-none" />
       <div className="absolute -bottom-32 -right-20 w-[32rem] h-[32rem] rounded-full bg-peach/8 blur-[110px] pointer-events-none" />
 
-      <div className="relative max-w-5xl mx-auto section-padding text-center">
+      <div className="relative max-w-5xl mx-auto section-padding">
         <h2
-          className="font-serif uppercase text-cream leading-[1] tracking-[-0.01em] whitespace-nowrap"
+          className="font-serif uppercase text-cream leading-[1] tracking-[-0.01em] whitespace-nowrap text-center"
           style={{ fontSize: 'clamp(1.9rem, 7.5vw, 4.75rem)' }}
         >
           <BlurRevealText text="Qui suis-je ?" mode="char" stagger={0.04} duration={0.5} />
         </h2>
 
-        <h3 className="font-serif text-cream leading-[1.05] text-balance font-medium mt-6 md:mt-8"
-            style={{ fontSize: 'clamp(1.7rem, 5.5vw, 4rem)' }}>
-          <BlurRevealText text="Comédienne" mode="word" stagger={0.08} />{' '}
-          <span className="italic font-normal text-white">
-            <BlurRevealText text="passionnée" mode="word" stagger={0.08} delay={0.15} />
-          </span>{' '}
-          <BlurRevealText text="par les voix qui racontent." mode="word" stagger={0.05} delay={0.35} />
-        </h3>
-
-        {/* Contenu (texte + photo) réuni dans un double cadre stylé */}
-        <div className="relative mt-12 md:mt-16">
-          <div className="relative border border-cream/25 rounded-[24px] p-6 sm:p-8 md:p-12 outline outline-1 outline-cream/12 outline-offset-[7px]">
-            {/* Coins accent */}
-            <span className="pointer-events-none absolute -top-2 -left-2 w-4 h-4 border-t border-l border-cream/55" />
-            <span className="pointer-events-none absolute -top-2 -right-2 w-4 h-4 border-t border-r border-cream/55" />
-            <span className="pointer-events-none absolute -bottom-2 -left-2 w-4 h-4 border-b border-l border-cream/55" />
-            <span className="pointer-events-none absolute -bottom-2 -right-2 w-4 h-4 border-b border-r border-cream/55" />
-
-            <div
-              ref={bodyRef}
-              className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14 items-center text-left opacity-0"
-            >
-          {/* Texte */}
-          <div className="space-y-6">
-            <p className="font-sans text-base md:text-lg text-cream/95 leading-relaxed">
-              Je m&apos;appelle Tiffany. Comédienne et lectrice, je prête ma voix aux histoires
-              qu&apos;on a envie d&apos;écouter — un livre audio qu&apos;on laisse couler le soir, un
-              spot qui fait sourire, une narration qui embarque.
-            </p>
-            <p className="font-sans text-base md:text-lg text-cream/85 leading-relaxed">
-              Formée au jeu, je choisis chaque souffle, chaque silence. J&apos;aime quand un texte
-              devient un moment, et quand un moment devient un souvenir. Mon studio est à
-              l&apos;écoute partout en France comme à l&apos;international, à distance ou en
-              présentiel.
-            </p>
-          </div>
-
-          {/* Photo illustration */}
-          <div className="flex justify-center">
-            <div className="relative w-[260px] h-[330px] sm:w-[300px] sm:h-[380px] md:w-full md:max-w-[400px] md:h-[460px] overflow-hidden rounded-2xl ring-1 ring-cream/15 shadow-[0_30px_80px_-25px_rgba(0,0,0,0.7)]">
+        <div ref={bodyRef} className="mt-12 md:mt-16 text-left opacity-0">
+          {/* Photo flottante à droite : le texte l'habille puis reprend toute la largeur dessous */}
+          <div className="md:float-right md:ml-10 md:mb-5 w-full max-w-[340px] md:w-[40%] md:max-w-[440px] mx-auto md:mx-0 mb-8">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-3xl ring-1 ring-cream/15 shadow-[0_30px_80px_-25px_rgba(0,0,0,0.7)]">
               <Image
                 src="/img/tiffany-about.jpg"
                 alt="Tiffany en studio"
@@ -104,16 +68,63 @@ export default function About() {
                 className="object-cover"
                 sizes="(max-width: 768px) 80vw, 40vw"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-studio/40 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-studio/45 via-transparent to-transparent" />
             </div>
+            <p className="mt-4 text-center md:text-left font-sans text-[11px] font-medium tracking-[0.28em] uppercase text-cream/50">
+              Narration · Voix off
+            </p>
           </div>
-            </div>
+
+          {/* Texte (habille la photo, puis pleine largeur) */}
+          <div className="space-y-4 md:space-y-5">
+            <p className="font-sans text-sm md:text-base text-cream/95 leading-relaxed">
+              Passionnée de littérature depuis toujours, j&apos;ai d&apos;abord transmis mon amour
+              des textes en tant que professeure de français. C&apos;est au contact d&apos;élèves aux
+              profils variés (dyslexiques, malvoyants ou en difficulté d&apos;apprentissage) que
+              j&apos;ai découvert toute la puissance de la lecture à voix haute et du livre audio.
+              J&apos;ai alors réalisé à quel point une voix pouvait donner vie à un texte, en révéler
+              le sens, transmettre des émotions et captiver un auditoire.
+            </p>
+            <p className="font-sans text-sm md:text-base text-cream/90 leading-relaxed">
+              Cette découverte a fait naître une évidence : à mon tour, je voulais raconter des
+              histoires.
+            </p>
+            <p className="font-sans text-sm md:text-base text-cream/90 leading-relaxed">
+              Curieuse, expressive et profondément attachée à la richesse des mots, j&apos;aime
+              explorer des registres très différents et me mettre au service de chaque texte. Roman,
+              récit historique, documentaire, guide touristique, spots publicitaires, présentation
+              d&apos;entreprise ou module e-learning : chaque projet représente pour moi une
+              rencontre et une expérience humaine unique.
+            </p>
+            <p className="font-sans text-sm md:text-base text-cream/90 leading-relaxed">
+              Ma voix est souvent décrite comme chaleureuse, captivante et incarnée. J&apos;accorde
+              une attention particulière à la compréhension d&apos;un texte, à son rythme, à sa
+              musicalité et à l&apos;émotion qu&apos;il porte. Mon objectif est simple : offrir une
+              interprétation sincère, vivante et fidèle à l&apos;intention de l&apos;auteur ou du
+              client.
+            </p>
+            <p className="font-sans text-sm md:text-base text-cream/90 leading-relaxed">
+              Cette envie de faire vivre les textes m&apos;a naturellement conduite à me former à la
+              narration de livres audio auprès de Mathieu Buscatto, lauréat du Prix Audiolib 2025,
+              ainsi qu&apos;à la voix off auprès de Julie Bataille, ancienne voix des Guignols de
+              l&apos;Info. En 2026, j&apos;ai également obtenu le 3e Prix du casting « La Voix » lors
+              du Festival du Livre Audio de Strasbourg.
+            </p>
+            <p className="font-sans text-sm md:text-base text-cream/90 leading-relaxed">
+              Professionnelle et réactive, je sais m&apos;adapter facilement et je m&apos;investis
+              pleinement dans chaque projet. Mon ouverture d&apos;esprit me permet d&apos;aborder avec
+              la même curiosité tous les types de textes et d&apos;univers, même ceux qui sont
+              éloignés de ma sensibilité. J&apos;aime découvrir de nouveaux horizons : chaque
+              territoire inconnu représente pour moi un défi, une source d&apos;enrichissement et une
+              nouvelle aventure. Ce sont souvent eux qui me passionnent le plus.
+            </p>
           </div>
+          <div className="clear-both" />
         </div>
 
         <p
           ref={signatureRef}
-          className="font-serif italic text-3xl md:text-4xl text-raspberry mt-14 opacity-0"
+          className="font-serif italic text-3xl md:text-4xl text-raspberry mt-14 text-center opacity-0"
         >
           Tiffany Voix Off
         </p>

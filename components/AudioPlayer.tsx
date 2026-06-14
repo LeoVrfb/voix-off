@@ -8,6 +8,8 @@ interface AudioTrack {
   id: string
   title: string
   category: string
+  /** Auteur du livre (optionnel — affiché sous le titre) */
+  author?: string
   src: string
   cover?: string
   /** Durée de secours affichée avant chargement des métadonnées */
@@ -157,26 +159,28 @@ export default function AudioPlayer({ tracks, variant = 'audiobook', grouped = f
                 )}
               </button>
 
-              {/* Mini waveform - deterministic */}
-              <div className="hidden lg:flex items-end gap-[2px] h-7 flex-shrink-0 w-14">
-                {[...Array(12)].map((_, i) => {
-                  const h = Math.round(25 + Math.abs(Math.sin(i * 0.9 + index * 0.5)) * 70)
-                  return (
-                    <div
-                      key={i}
-                      className={`w-[2px] rounded-full transition-all duration-300 ${
-                        isActive && isPlaying ? 'animate-pulse' : ''
-                      }`}
-                      style={{
-                        height: `${h}%`,
-                        animationDelay: `${i * 0.06}s`,
-                        backgroundColor:
-                          isActive && isPlaying ? accentHex : 'rgba(238, 226, 223, 0.25)',
-                      }}
-                    />
-                  )
-                })}
-              </div>
+              {/* Mini waveform - deterministic (uniquement voix off : laisse la place au titre des livres) */}
+              {variant === 'voiceover' && (
+                <div className="hidden lg:flex items-end gap-[2px] h-7 flex-shrink-0 w-14">
+                  {[...Array(12)].map((_, i) => {
+                    const h = Math.round(25 + Math.abs(Math.sin(i * 0.9 + index * 0.5)) * 70)
+                    return (
+                      <div
+                        key={i}
+                        className={`w-[2px] rounded-full transition-all duration-300 ${
+                          isActive && isPlaying ? 'animate-pulse' : ''
+                        }`}
+                        style={{
+                          height: `${h}%`,
+                          animationDelay: `${i * 0.06}s`,
+                          backgroundColor:
+                            isActive && isPlaying ? accentHex : 'rgba(238, 226, 223, 0.25)',
+                        }}
+                      />
+                    )
+                  })}
+                </div>
+              )}
 
               {/* Track info */}
               <div className="flex-1 min-w-0">
@@ -187,12 +191,17 @@ export default function AudioPlayer({ tracks, variant = 'audiobook', grouped = f
                 >
                   {track.title}
                 </p>
-                {!grouped && (
+                {track.category && (
                   <p
                     className="font-sans text-[10px] font-medium uppercase tracking-[0.2em] mt-1.5"
                     style={{ color: accentHex }}
                   >
                     {track.category}
+                  </p>
+                )}
+                {track.author && (
+                  <p className="font-serif italic text-xs md:text-sm text-cream/70 leading-tight mt-1 truncate">
+                    {track.author}
                   </p>
                 )}
               </div>

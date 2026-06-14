@@ -10,18 +10,19 @@ import BlurRevealText from '@/components/ui/BlurRevealText'
 gsap.registerPlugin(ScrollTrigger)
 
 const audiobookTracks = [
-  { id: 'la-1', title: '49 jours', category: 'Romans', src: '/demos/audio/49-jours.m4a', cover: '/demos/covers/49-jours.jpg' },
-  { id: 'la-3', title: 'Requiem pour les fantômes', category: 'Romans', src: '/demos/audio/requiem-pour-les-fantomes.m4a', cover: '/demos/covers/requiem-pour-les-fantomes.jpg' },
-  { id: 'la-4', title: 'Le cosmos et nous', category: 'Essais', src: '/demos/audio/le-cosmos-et-nous.m4a', cover: '/demos/covers/le-cosmos-et-nous.jpg' },
-  { id: 'la-2', title: 'Une joie', category: 'Nouvelles', src: '/demos/audio/une-joie.m4a', cover: '/demos/covers/une-joie.jpg' },
-  { id: 'la-5', title: 'Conte pour enfants', category: 'Contes pour enfants', src: '/demos/audio/conte-pour-enfants.m4a', cover: '/demos/covers/conte-pour-enfants.jpg' },
+  { id: 'la-1', title: '49 jours, je compterai pour toi', category: 'New Romance', author: 'C. S. Quill', duration: '1:51', src: '/demos/audio/49-jours.m4a', cover: '/demos/covers/49-jours.jpg' },
+  { id: 'la-4', title: 'Le cosmos et nous', category: 'Essais', author: 'Sébastien Carassou', duration: '2:26', src: '/demos/audio/le-cosmos-et-nous.m4a', cover: '/demos/covers/le-cosmos-et-nous.jpg' },
+  { id: 'la-2', title: 'Une joie', category: 'Nouvelles', author: 'Anton Tchekhov', duration: '1:18', src: '/demos/audio/une-joie.m4a', cover: '/demos/covers/une-joie.jpg' },
+  { id: 'la-6', title: 'La maison hantée', category: 'Fantastique', author: 'Shirley Jackson', duration: '3:53', src: '/demos/audio/maison-hantee.m4a', cover: '/demos/covers/maison-hantee.jpg' },
+  { id: 'la-3', title: 'Requiem pour les fantômes', category: 'Fantasy', author: 'Katherine Arden', duration: '1:44', src: '/demos/audio/requiem-pour-les-fantomes.m4a', cover: '/demos/covers/requiem-pour-les-fantomes.jpg' },
+  { id: 'la-5', title: 'Conte pour enfants', category: 'Jeunesse', duration: '1:12', src: '/demos/audio/conte-pour-enfants.m4a', cover: '/demos/covers/conte-pour-enfants.jpg' },
 ]
 
 const voiceoverTracks = [
-  { id: 'vo-1', title: 'Prada', category: 'Publicité', src: '/demos/audio/prada.m4a', cover: '/demos/covers/prada.jpg' },
-  { id: 'vo-2', title: 'Banque Populaire', category: 'Publicité', src: '/demos/audio/banque-populaire.m4a', cover: '/demos/covers/banque-populaire.png' },
-  { id: 'vo-3', title: 'Top Chef', category: 'Télévision', src: '/demos/audio/top-chef.m4a', cover: '/demos/covers/top-chef.jpg' },
-  { id: 'vo-4', title: 'Carrefour', category: 'Publicité', src: '/demos/audio/carrefour.m4a', cover: '/demos/covers/carrefour.jpg' },
+  { id: 'vo-1', title: 'Prada', category: 'Publicité', duration: '0:18', src: '/demos/audio/prada.m4a', cover: '/demos/covers/prada.jpg' },
+  { id: 'vo-2', title: 'Banque Populaire', category: 'Publicité', duration: '1:08', src: '/demos/audio/banque-populaire.m4a', cover: '/demos/covers/banque-populaire.png' },
+  { id: 'vo-3', title: 'Top Chef', category: 'Télévision', duration: '0:06', src: '/demos/audio/top-chef.m4a', cover: '/demos/covers/top-chef.jpg' },
+  { id: 'vo-4', title: 'Carrefour', category: 'Publicité', duration: '0:41', src: '/demos/audio/carrefour.m4a', cover: '/demos/covers/carrefour.jpg' },
 ]
 
 export default function MetsDesMots() {
@@ -98,7 +99,7 @@ export default function MetsDesMots() {
               Livres audio
               <span className="block w-12 h-0.5 bg-raspberry/70 rounded-full mt-3" />
             </h3>
-            <AudioPlayer tracks={audiobookTracks} variant="audiobook" grouped />
+            <AudioPlayer tracks={audiobookTracks} variant="audiobook" />
           </div>
 
           <div ref={voixRef} className="opacity-0">

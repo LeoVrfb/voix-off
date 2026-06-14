@@ -15,7 +15,7 @@ import {
 
 gsap.registerPlugin(ScrollTrigger)
 
-const projectTypes = ['Voix off', 'Livre audio', 'Pub / spot', 'Documentaire', 'Podcast', 'Autre']
+const projectTypes = ['Livre audio', 'Publicité', 'TV / Radio', 'E-learning', 'Documentaire', 'Podcast']
 
 export default function Contact() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -218,7 +218,7 @@ export default function Contact() {
           <div ref={infoRef} className="lg:col-span-5 opacity-0">
             <div className="space-y-5">
               <a
-                href="mailto:contact@tiffany-voixoff.fr"
+                href="mailto:contact@tiffanyvoixoff.fr"
                 className="group block p-6 rounded-3xl border border-cream/20 bg-cream/[0.05] hover:bg-cream/[0.09] hover:border-raspberry/50 transition-all duration-300"
               >
                 <div className="flex items-start gap-4">
@@ -230,7 +230,7 @@ export default function Contact() {
                       E-mail direct
                     </p>
                     <p className="font-serif text-lg md:text-xl text-cream group-hover:text-raspberry transition-colors break-all">
-                      contact@tiffany-voixoff.fr
+                      contact@tiffanyvoixoff.fr
                     </p>
                   </div>
                 </div>
@@ -283,7 +283,7 @@ export default function Contact() {
                 Tiffany <span className="italic text-raspberry">Voix Off</span>
               </p>
               <p className="font-sans text-[10px] font-medium tracking-[0.3em] uppercase text-cream/80 mt-1">
-                Comédienne · Narratrice · Voix off
+                Narration · Voix off
               </p>
             </div>
 

@@ -1,32 +1,33 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
+import { useEffect, useRef } from 'react'
 
 /**
- * ShaderBackground — fond animé WebGL "plasma" de 21st.dev
- * (minhxthanh/shader-background), mouvement libre d'origine.
+ * ShaderBackground — fond animé WebGL "plasma" (lignes ondulantes + halos),
+ * adapté de 21st.dev (minhxthanh/shader-background).
  *
  * Différences avec l'original :
- *  - FOND supprimé (canvas transparent), on ne garde que les lignes (violet) ;
- *  - le champ d'interaction vertical est borné par [fieldBottom, fieldTop]
- *    (unités "espace plasma") : on ne COUPE jamais les ondes, on remappe leur
- *    amplitude dans cette bande. Réduire la bande = ondes plus resserrées.
- *  - mode debug : bordures rouges nettes (dessinées dans le shader) + poignées
- *    DRAGGABLES rendues en overlay `position: fixed` (z très élevé) afin
- *    qu'elles soient attrapables au-dessus de toutes les sections.
+ *  - remplit son conteneur parent (pas tout l'écran) ;
+ *  - se met en pause hors écran / onglet caché ;
+ *  - typé, nettoyage complet ;
+ *  - FOND TRANSPARENT : on supprime le dégradé bleu/violet, mais les lignes
+ *    gardent EXACTEMENT leur couleur et leur intensité (alpha prémultiplié,
+ *    donc pas de délavage ni de translucidité parasite).
  */
 
 interface ShaderBackgroundProps {
   className?: string
-  /** Bord HAUT du champ d'interaction (unités espace, 0 = centre du canvas). */
-  fieldTop?: number
-  /** Bord BAS du champ d'interaction (unités espace, négatif = sous le centre). */
-  fieldBottom?: number
-  /** Affiche les bordures rouges nettes (haut/bas) du champ. */
-  showField?: boolean
-  /** Active les poignées draggables (n'a d'effet qu'avec showField). */
-  interactive?: boolean
+  /** Vitesse globale (1 = vitesse d'origine). */
+  speed?: number
+  /** Palette des lignes (3 couleurs, dégradées d'une ligne à l'autre). */
+  colors?: [string, string, string]
+  /**
+   * Étendue verticale visible en unités "espace plasma".
+   * Plus la valeur est grande, plus on dézoome verticalement (les courbes
+   * paraissent plus tassées mais on est sûr de toutes les voir).
+   * 9 = cadrage serré (lignes touchant presque les bords), 10-11 = un peu de marge.
+   */
+  verticalExtent?: number
 }
 
 const vsSource = `
@@ -40,26 +41,26 @@ const fsSource = `
   precision highp float;
   uniform vec2 iResolution;
   uniform float iTime;
-  uniform float uFieldTop;     // bord haut du champ (unités espace, baseY)
-  uniform float uFieldBottom;  // bord bas du champ (unités espace, baseY)
-  uniform float uShowField;    // > 0.5 => bordures rouges de debug
+  uniform float uSpeed;
+  uniform vec3 uColA;
+  uniform vec3 uColB;
+  uniform vec3 uColC;
+  // Étendue verticale visible (en unités "espace plasma").
+  // Les lignes s'étalent ~±4.5 ; une valeur >= 9 garantit qu'elles
+  // tiennent toutes dans le cadre quelle que soit sa hauteur.
+  uniform float uVerticalExtent;
 
-  const float overallSpeed = 0.2;
-  const float gridSmoothWidth = 0.015;
   const float scale = 5.0;
-  const vec4 lineColor = vec4(0.4, 0.2, 0.8, 1.0);
+  const float gridSmoothWidth = 0.015;
   const float minLineWidth = 0.01;
   const float maxLineWidth = 0.2;
-  const float lineSpeed = 1.0 * overallSpeed;
-  const float lineAmplitude = 1.0;
-  const float lineFrequency = 0.2;
-  const float warpSpeed = 0.2 * overallSpeed;
+  const float lineAmplitude = 2.2;
+  const float lineFrequency = 0.33;
   const float warpFrequency = 0.5;
   const float warpAmplitude = 1.0;
   const float offsetFrequency = 0.5;
-  const float offsetSpeed = 1.33 * overallSpeed;
-  const float minOffsetSpread = 0.6;
-  const float maxOffsetSpread = 2.0;
+  const float minOffsetSpread = 0.35;
+  const float maxOffsetSpread = 1.5;
   const int linesPerGroup = 16;
 
   #define drawCircle(pos, radius, coord) smoothstep(radius + gridSmoothWidth, radius, length(coord - (pos)))
@@ -70,28 +71,47 @@ const fsSource = `
     return (cos(t) + cos(t * 1.3 + 1.3) + cos(t * 1.4 + 1.4)) / 3.0;
   }
 
-  float getPlasmaY(float x, float horizontalFade, float offset) {
-    return random(x * lineFrequency + iTime * lineSpeed) * horizontalFade * lineAmplitude + offset;
+  // tanh (absent en GLSL ES 1.0) : replie les valeurs extrêmes vers une limite
+  // sans coupure brutale. Sert à contenir les ondes dans le cadre.
+  float tanhApprox(float x) {
+    x = clamp(x, -4.0, 4.0);
+    float e = exp(2.0 * x);
+    return (e - 1.0) / (e + 1.0);
   }
 
-  // Amplitude verticale "naturelle" max du motif (plasma ~3 + warp ~1.5). Sert
-  // à remapper la plage [-nominalSpread, +nominalSpread] dans [bottom, top].
-  const float nominalSpread = 4.5;
+  float getPlasmaY(float x, float horizontalFade, float offset, float lineSpeed, float phase) {
+    // Onde de base (basse fréquence). La PHASE par ligne décorrèle les tracés :
+    // chaque filament a sa propre forme/direction au lieu de bouger à l'unisson.
+    float base = random(x * lineFrequency + iTime * lineSpeed + phase);
+    // Harmonique plus haute fréquence : variations de courbure + pentes franches.
+    float detail = random(x * lineFrequency * 2.6 + iTime * lineSpeed * 1.4 + 4.0 + phase * 1.3) * 0.55;
+    return (base + detail) * horizontalFade * lineAmplitude + offset;
+  }
 
   void main() {
+    float overallSpeed = 0.2 * uSpeed;
+    float lineSpeed = overallSpeed;
+    float warpSpeed = 0.2 * overallSpeed;
+    float offsetSpeed = 1.33 * overallSpeed;
+
     vec2 fragCoord = gl_FragCoord.xy;
     vec2 uv = fragCoord.xy / iResolution.xy;
-    vec2 space = (fragCoord - iResolution.xy / 2.0) / iResolution.x * 2.0 * scale;
+    // X : normalisé par la largeur (ondulation horizontale inchangée).
+    // Y : normalisé par la HAUTEUR avec une étendue fixe -> indépendant de
+    // l'aspect ratio. Toute l'amplitude des courbes tient donc toujours dans
+    // le cadre, même très court. Le tracé reste divers (math plasma intacte).
+    vec2 space;
+    space.x = (fragCoord.x - iResolution.x / 2.0) / iResolution.x * 2.0 * scale;
+    space.y = (fragCoord.y - iResolution.y / 2.0) / iResolution.y * uVerticalExtent;
 
     float horizontalFade = 1.0 - (cos(uv.x * 6.28) * 0.5 + 0.5);
 
-    // Warp vertical organique — gardé à part pour garder une coordonnée pure.
-    float warpY = random(space.x * warpFrequency + iTime * warpSpeed) * warpAmplitude * (0.5 + horizontalFade);
-    space.y += warpY;
+    // Warp horizontal uniquement : on garde la déformation organique sur X,
+    // mais plus sur Y (sinon les lignes étaient poussées hors cadre).
     space.x += random(space.y * warpFrequency + iTime * warpSpeed + 2.0) * warpAmplitude * horizontalFade;
 
-    // Coordonnée verticale PURE (sans warp) : compare les lignes + bordures.
-    float baseY = (fragCoord.y - iResolution.y * 0.5) / iResolution.x * 2.0 * scale;
+    // Limite verticale visible (marge pour l'épaisseur du trait).
+    float vLimit = uVerticalExtent * 0.5 - 0.2;
 
     vec4 lines = vec4(0.0);
 
@@ -101,38 +121,52 @@ const fsSource = `
       float offsetPosition = float(l) + space.x * offsetFrequency;
       float rand = random(offsetPosition + offsetTime) * 0.5 + 0.5;
       float halfWidth = mix(minLineWidth, maxLineWidth, rand * horizontalFade) / 2.0;
+      // Phase propre à chaque ligne -> filaments décorrélés (formes/directions différentes).
+      float phase = float(l) * 3.0;
       float offset = random(offsetPosition + offsetTime * (1.0 + normalizedLineIndex)) * mix(minOffsetSpread, maxOffsetSpread, horizontalFade);
-
-      // Position naturelle de la ligne, remappée dans la bande [bottom, top].
-      float nat = getPlasmaY(space.x, horizontalFade, offset) - warpY;
-      float t = (nat + nominalSpread) / (2.0 * nominalSpread);
-      float targetY = mix(uFieldBottom, uFieldTop, t);
-      float line = drawSmoothLine(targetY, halfWidth, baseY) / 2.0 + drawCrispLine(targetY, halfWidth * 0.15, baseY);
+      float linePosition = getPlasmaY(space.x, horizontalFade, offset, lineSpeed, phase);
+      // Compression douce : les ondes gardent leur amplitude, mais les crêtes
+      // extrêmes sont repliées dans le cadre au lieu d'en sortir (= invisibles).
+      linePosition = vLimit * tanhApprox(linePosition / vLimit);
+      float line = drawSmoothLine(linePosition, halfWidth, space.y) / 2.0 + drawCrispLine(linePosition, halfWidth * 0.15, space.y);
 
       float circleX = mod(float(l) + iTime * lineSpeed, 25.0) - 12.0;
-      float natC = getPlasmaY(circleX, horizontalFade, offset) - warpY;
-      float tC = (natC + nominalSpread) / (2.0 * nominalSpread);
-      float circleY = mix(uFieldBottom, uFieldTop, tC);
-      float circle = drawCircle(vec2(circleX, circleY), 0.01, vec2(space.x, baseY)) * 4.0;
+      float circleY = vLimit * tanhApprox(getPlasmaY(circleX, horizontalFade, offset, lineSpeed, phase) / vLimit);
+      vec2 circlePosition = vec2(circleX, circleY);
+      float circle = drawCircle(circlePosition, 0.01, space) * 4.0;
 
       line = line + circle;
-      lines += line * lineColor * rand;
+
+      // Palette multicolore du site : lavender -> raspberry -> peach selon la ligne
+      vec3 lc = normalizedLineIndex < 0.5
+        ? mix(uColA, uColB, normalizedLineIndex * 2.0)
+        : mix(uColB, uColC, (normalizedLineIndex - 0.5) * 2.0);
+      lines += line * vec4(lc, 1.0) * rand;
     }
 
-    // Fond supprimé : que les lignes, sur transparent.
+    // Fond transparent, lignes à pleine intensité.
+    // alpha prémultiplié : la couleur reste lines.rgb (non divisée),
+    // donc pas de délavage là où la ligne est moins intense.
     float alpha = clamp(max(lines.r, max(lines.g, lines.b)), 0.0, 1.0);
     gl_FragColor = vec4(lines.rgb, alpha);
-
-    // Bordures rouges de debug : exactement les limites du champ.
-    if (uShowField > 0.5) {
-      float bw = 0.012;
-      float top = drawCrispLine(uFieldTop, bw, baseY);
-      float bot = drawCrispLine(uFieldBottom, bw, baseY);
-      float border = clamp(top + bot, 0.0, 1.0);
-      gl_FragColor = mix(gl_FragColor, vec4(1.0, 0.0, 0.0, 1.0), border);
-    }
   }
 `
+
+function hexToRgb(hex: string): [number, number, number] {
+  const clean = hex.replace('#', '')
+  const full =
+    clean.length === 3
+      ? clean
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : clean
+  return [
+    parseInt(full.slice(0, 2), 16) / 255,
+    parseInt(full.slice(2, 4), 16) / 255,
+    parseInt(full.slice(4, 6), 16) / 255,
+  ]
+}
 
 function loadShader(
   gl: WebGLRenderingContext,
@@ -173,46 +207,20 @@ function initShaderProgram(
 
 export default function ShaderBackground({
   className,
-  fieldTop = 2.2,
-  fieldBottom = -2.2,
-  showField = false,
-  interactive = false,
+  speed = 1,
+  // Palette du site par défaut : lavender -> raspberry -> peach
+  colors = ['#7681B3', '#CB769E', '#EED7C5'],
+  verticalExtent = 10,
 }: ShaderBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
 
-  // Valeurs live du champ (refs => lues par le shader chaque frame, sans re-render).
-  const topRef = useRef(fieldTop)
-  const bottomRef = useRef(fieldBottom)
-  const showFieldRef = useRef(showField)
-  showFieldRef.current = showField
-
-  // Re-synchro sur les props (ex : changement de taille d'écran => nouvelles
-  // valeurs par device). Le drag repart donc de la valeur du device courant.
-  useEffect(() => {
-    topRef.current = fieldTop
-  }, [fieldTop])
-  useEffect(() => {
-    bottomRef.current = fieldBottom
-  }, [fieldBottom])
-
-  // Poignées (overlay fixe) — refs DOM, pilotées en impératif.
-  const topHandleRef = useRef<HTMLDivElement>(null)
-  const bottomHandleRef = useRef<HTMLDivElement>(null)
-  const topLabelRef = useRef<HTMLSpanElement>(null)
-  const bottomLabelRef = useRef<HTMLSpanElement>(null)
-
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
-
-  const showHandles = showField && interactive
-
-  // ── WebGL ──────────────────────────────────────────────────────────────
   useEffect(() => {
     const canvas = canvasRef.current
     const wrapper = wrapperRef.current
     if (!canvas || !wrapper) return
 
+    // alpha prémultiplié (défaut) -> le navigateur composite lines.rgb + page*(1-alpha)
     const gl = canvas.getContext('webgl', { alpha: true })
     if (!gl) {
       console.warn('WebGL not supported.')
@@ -231,14 +239,21 @@ export default function ShaderBackground({
       vertexPosition: gl.getAttribLocation(program, 'aVertexPosition'),
       resolution: gl.getUniformLocation(program, 'iResolution'),
       time: gl.getUniformLocation(program, 'iTime'),
-      fieldTop: gl.getUniformLocation(program, 'uFieldTop'),
-      fieldBottom: gl.getUniformLocation(program, 'uFieldBottom'),
-      showField: gl.getUniformLocation(program, 'uShowField'),
+      speed: gl.getUniformLocation(program, 'uSpeed'),
+      colA: gl.getUniformLocation(program, 'uColA'),
+      colB: gl.getUniformLocation(program, 'uColB'),
+      colC: gl.getUniformLocation(program, 'uColC'),
+      verticalExtent: gl.getUniformLocation(program, 'uVerticalExtent'),
     }
 
+    const colA = hexToRgb(colors[0])
+    const colB = hexToRgb(colors[1])
+    const colC = hexToRgb(colors[2])
+
+    let dpr = Math.min(2, window.devicePixelRatio || 1)
     const ensureSize = () => {
       const rect = canvas.getBoundingClientRect()
-      const dpr = Math.min(2, window.devicePixelRatio || 1)
+      dpr = Math.min(2, window.devicePixelRatio || 1)
       const w = Math.max(1, Math.floor(rect.width * dpr))
       const h = Math.max(1, Math.floor(rect.height * dpr))
       if (canvas.width !== w || canvas.height !== h) {
@@ -268,9 +283,11 @@ export default function ShaderBackground({
 
       gl.uniform2f(loc.resolution, canvas.width, canvas.height)
       gl.uniform1f(loc.time, currentTime)
-      gl.uniform1f(loc.fieldTop, topRef.current)
-      gl.uniform1f(loc.fieldBottom, bottomRef.current)
-      gl.uniform1f(loc.showField, showFieldRef.current ? 1 : 0)
+      gl.uniform1f(loc.speed, speed)
+      gl.uniform3f(loc.colA, colA[0], colA[1], colA[2])
+      gl.uniform3f(loc.colB, colB[0], colB[1], colB[2])
+      gl.uniform3f(loc.colC, colC[0], colC[1], colC[2])
+      gl.uniform1f(loc.verticalExtent, verticalExtent)
 
       gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
       gl.vertexAttribPointer(loc.vertexPosition, 2, gl.FLOAT, false, 0, 0)
@@ -321,121 +338,19 @@ export default function ShaderBackground({
       gl.deleteProgram(program)
       gl.deleteBuffer(positionBuffer)
     }
-  }, [])
-
-  // ── Poignées : positionnement impératif via rAF (suit scroll/resize). ────
-  useEffect(() => {
-    if (!showHandles) return
-    let raf = 0
-    const tick = () => {
-      const wrapper = wrapperRef.current
-      if (wrapper) {
-        const r = wrapper.getBoundingClientRect()
-        const unit = r.width / 10 // 1 unité espace = width/10 px (scale=5)
-        const center = r.top + r.height / 2 // baseY = 0 au centre du canvas
-        const place = (
-          el: HTMLDivElement | null,
-          label: HTMLSpanElement | null,
-          field: number,
-          name: string
-        ) => {
-          if (!el) return
-          el.style.left = `${r.left}px`
-          el.style.width = `${r.width}px`
-          el.style.top = `${center - field * unit - 14}px`
-          if (label) label.textContent = `${name} ${field.toFixed(2)}`
-        }
-        place(topHandleRef.current, topLabelRef.current, topRef.current, 'haut')
-        place(bottomHandleRef.current, bottomLabelRef.current, bottomRef.current, 'bas')
-      }
-      raf = requestAnimationFrame(tick)
-    }
-    raf = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf)
-  }, [showHandles])
-
-  const startDrag = (which: 'top' | 'bottom') => (e: React.PointerEvent) => {
-    e.preventDefault()
-    const move = (ev: PointerEvent) => {
-      const wrapper = wrapperRef.current
-      if (!wrapper) return
-      const r = wrapper.getBoundingClientRect()
-      const field =
-        Math.round((((r.top + r.height / 2 - ev.clientY) * 10) / r.width) * 100) / 100
-      if (which === 'top') topRef.current = field
-      else bottomRef.current = field
-    }
-    const up = () => {
-      window.removeEventListener('pointermove', move)
-      window.removeEventListener('pointerup', up)
-    }
-    window.addEventListener('pointermove', move)
-    window.addEventListener('pointerup', up)
-  }
-
-  const fixedHandleStyle: React.CSSProperties = {
-    position: 'fixed',
-    height: 28,
-    zIndex: 9999,
-    cursor: 'ns-resize',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    pointerEvents: 'auto',
-    touchAction: 'none',
-  }
-
-  const labelStyle: React.CSSProperties = {
-    fontFamily: 'ui-monospace, monospace',
-    fontSize: 11,
-    fontWeight: 700,
-    color: '#fff',
-    background: 'rgba(220,0,0,0.9)',
-    padding: '3px 10px',
-    borderRadius: 999,
-    userSelect: 'none',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.5)',
-  }
+  }, [speed, colors, verticalExtent])
 
   return (
-    <>
-      <div
-        ref={wrapperRef}
-        className={className}
-        style={{ position: 'absolute', inset: 0 }}
-      >
-        <canvas
-          ref={canvasRef}
-          aria-hidden="true"
-          style={{ width: '100%', height: '100%', display: 'block' }}
-        />
-      </div>
-
-      {mounted &&
-        showHandles &&
-        createPortal(
-          <>
-            <div
-              ref={topHandleRef}
-              onPointerDown={startDrag('top')}
-              style={fixedHandleStyle}
-            >
-              <span ref={topLabelRef} style={labelStyle}>
-                haut
-              </span>
-            </div>
-            <div
-              ref={bottomHandleRef}
-              onPointerDown={startDrag('bottom')}
-              style={fixedHandleStyle}
-            >
-              <span ref={bottomLabelRef} style={labelStyle}>
-                bas
-              </span>
-            </div>
-          </>,
-          document.body
-        )}
-    </>
+    <div
+      ref={wrapperRef}
+      className={className}
+      style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}
+    >
+      <canvas
+        ref={canvasRef}
+        aria-hidden="true"
+        style={{ width: '100%', height: '100%', display: 'block' }}
+      />
+    </div>
   )
 }
