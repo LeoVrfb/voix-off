@@ -31,6 +31,7 @@ export default function Contact() {
   })
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isError, setIsError] = useState(false)
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -45,9 +46,20 @@ export default function Contact() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    setIsSubmitting(false)
-    setIsSubmitted(true)
+    setIsError(false)
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      })
+      if (!res.ok) throw new Error('send failed')
+      setIsSubmitted(true)
+    } catch {
+      setIsError(true)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   useEffect(() => {
@@ -210,6 +222,16 @@ export default function Contact() {
                     </>
                   )}
                 </button>
+
+                {isError && (
+                  <p className="font-sans text-sm text-raspberry">
+                    L&apos;envoi a échoué. Réessayez ou écrivez directement à{' '}
+                    <a href="mailto:contact@tiffanyvoixoff.fr" className="underline">
+                      contact@tiffanyvoixoff.fr
+                    </a>
+                    .
+                  </p>
+                )}
               </form>
             )}
           </div>
