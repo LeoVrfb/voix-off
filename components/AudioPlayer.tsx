@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { Play, Pause, Volume2 } from 'lucide-react'
 
@@ -35,10 +35,52 @@ export default function AudioPlayer({ tracks, variant = 'audiobook', grouped = f
   const [currentTrack, setCurrentTrack] = useState<number | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
   const [durations, setDurations] = useState<Record<number, string>>({})
   const audioRefs = useRef<(HTMLAudioElement | null)[]>([])
+  // Position visée pendant un glissement — appliquée seulement au relâchement
+  const pendingSeek = useRef<number | null>(null)
 
   const accentHex = variant === 'voiceover' ? '#CFC3AE' : '#B8AE9F'
+
+  // Aperçu visuel uniquement : déplace le curseur SANS toucher la tête de
+  // lecture (l'audio continue normalement, pas d'effet "voix à l'envers").
+  const previewSeek = (index: number, clientX: number, bar: HTMLElement) => {
+    const audio = audioRefs.current[index]
+    if (!audio || !Number.isFinite(audio.duration) || audio.duration === 0) return
+    const rect = bar.getBoundingClientRect()
+    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width))
+    pendingSeek.current = ratio
+    setProgress(ratio * 100)
+    setCurrentTime(ratio * audio.duration)
+  }
+
+  // Au relâchement : on saute réellement à la position visée
+  const commitSeek = (index: number) => {
+    const audio = audioRefs.current[index]
+    if (audio && pendingSeek.current !== null && Number.isFinite(audio.duration)) {
+      audio.currentTime = pendingSeek.current * audio.duration
+    }
+    pendingSeek.current = null
+  }
+
+  // Progression fluide (60 fps) pendant la lecture — l'événement natif
+  // "timeupdate" ne se déclenche que ~4×/s, d'où l'avancée saccadée.
+  useEffect(() => {
+    if (currentTrack === null || !isPlaying || isDragging) return
+    let raf = 0
+    const tick = () => {
+      const audio = audioRefs.current[currentTrack]
+      if (audio && Number.isFinite(audio.duration) && audio.duration > 0) {
+        setProgress((audio.currentTime / audio.duration) * 100)
+        setCurrentTime(audio.currentTime)
+      }
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [currentTrack, isPlaying, isDragging])
 
   const handlePlay = (index: number) => {
     const audio = audioRefs.current[index]
@@ -66,6 +108,7 @@ export default function AudioPlayer({ tracks, variant = 'audiobook', grouped = f
 
     setCurrentTrack(index)
     setProgress(0)
+    setCurrentTime(0)
     audio.currentTime = 0
     void audio.play().catch(() => {})
     setIsPlaying(true)
@@ -85,7 +128,7 @@ export default function AudioPlayer({ tracks, variant = 'audiobook', grouped = f
             {/* Progress background */}
             {isActive && (
               <div
-                className="absolute left-0 top-0 bottom-0 transition-all duration-100 pointer-events-none"
+                className="absolute left-0 top-0 bottom-0 pointer-events-none"
                 style={{
                   width: `${progress}%`,
                   background: `linear-gradient(90deg, ${accentHex}22, ${accentHex}10)`,
@@ -117,13 +160,15 @@ export default function AudioPlayer({ tracks, variant = 'audiobook', grouped = f
                 }
               }}
               onTimeUpdate={(e) => {
-                if (currentTrack !== index) return
+                if (currentTrack !== index || isDragging) return
                 const a = e.currentTarget
                 setProgress(a.duration ? (a.currentTime / a.duration) * 100 : 0)
+                setCurrentTime(a.currentTime)
               }}
               onEnded={() => {
                 setIsPlaying(false)
                 setProgress(0)
+                setCurrentTime(0)
               }}
             />
 
@@ -216,6 +261,56 @@ export default function AudioPlayer({ tracks, variant = 'audiobook', grouped = f
                 </span>
               </div>
             </div>
+
+            {/* Barre de lecture interactive — visible quand la piste est active */}
+            {isActive && (
+              <div className="relative px-4 sm:px-5 pb-4 -mt-1">
+                <div
+                  className="group/seek relative h-4 flex items-center cursor-pointer touch-none"
+                  role="slider"
+                  aria-label="Position dans la piste"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={Math.round(progress)}
+                  onPointerDown={(e) => {
+                    e.currentTarget.setPointerCapture(e.pointerId)
+                    setIsDragging(true)
+                    previewSeek(index, e.clientX, e.currentTarget)
+                  }}
+                  onPointerMove={(e) => {
+                    if (isDragging) previewSeek(index, e.clientX, e.currentTarget)
+                  }}
+                  onPointerUp={(e) => {
+                    commitSeek(index)
+                    setIsDragging(false)
+                    e.currentTarget.releasePointerCapture(e.pointerId)
+                  }}
+                  onPointerCancel={(e) => {
+                    commitSeek(index)
+                    setIsDragging(false)
+                    e.currentTarget.releasePointerCapture(e.pointerId)
+                  }}
+                >
+                  {/* Rail */}
+                  <div className="absolute left-0 right-0 h-1 rounded-full bg-cream/15" />
+                  {/* Progression */}
+                  <div
+                    className="absolute left-0 h-1 rounded-full pointer-events-none"
+                    style={{ width: `${progress}%`, backgroundColor: accentHex }}
+                  />
+                  {/* Curseur */}
+                  <div
+                    className="absolute w-3 h-3 rounded-full shadow-[0_2px_8px_-1px_rgba(0,0,0,0.6)] -translate-x-1/2 transition-transform duration-150 group-hover/seek:scale-125 pointer-events-none"
+                    style={{ left: `${progress}%`, backgroundColor: accentHex }}
+                  />
+                </div>
+                {/* Minutage */}
+                <div className="flex justify-between mt-1 font-sans text-[10px] tabular-nums text-cream/55">
+                  <span>{formatTime(currentTime)}</span>
+                  <span>{durations[index] ?? track.duration ?? '--:--'}</span>
+                </div>
+              </div>
+            )}
 
             {/* Bottom accent line */}
             <div

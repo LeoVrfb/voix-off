@@ -70,14 +70,14 @@ export default function About() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-studio/45 via-transparent to-transparent" />
             </div>
-            <p className="mt-4 text-center md:text-left font-sans text-[11px] font-medium tracking-[0.28em] uppercase text-cream/50">
+            <p className="mt-4 text-center font-sans text-[11px] font-medium tracking-[0.28em] uppercase text-cream/50">
               Narration · Voix off
             </p>
           </div>
 
-          {/* Texte (habille la photo, puis pleine largeur) */}
-          <div className="space-y-4 md:space-y-5">
-            <p className="font-sans text-sm md:text-base text-cream/95 leading-relaxed">
+          {/* Texte (habille la photo, puis pleine largeur) — police Lora */}
+          <div className="space-y-4 md:space-y-5" style={{ fontFamily: 'Lora, serif' }}>
+            <p className="text-base md:text-lg text-cream/95 leading-relaxed">
               Passionnée de littérature depuis toujours, j&apos;ai d&apos;abord transmis mon amour
               des textes en tant que professeure de français. C&apos;est au contact d&apos;élèves aux
               profils variés (dyslexiques, malvoyants ou en difficulté d&apos;apprentissage) que
@@ -85,32 +85,32 @@ export default function About() {
               J&apos;ai alors réalisé à quel point une voix pouvait donner vie à un texte, en révéler
               le sens, transmettre des émotions et captiver un auditoire.
             </p>
-            <p className="font-sans text-sm md:text-base text-cream/90 leading-relaxed">
+            <p className="text-base md:text-lg text-cream/90 leading-relaxed">
               Cette découverte a fait naître une évidence : à mon tour, je voulais raconter des
               histoires.
             </p>
-            <p className="font-sans text-sm md:text-base text-cream/90 leading-relaxed">
+            <p className="text-base md:text-lg text-cream/90 leading-relaxed">
               Curieuse, expressive et profondément attachée à la richesse des mots, j&apos;aime
               explorer des registres très différents et me mettre au service de chaque texte. Roman,
               récit historique, documentaire, guide touristique, spots publicitaires, présentation
               d&apos;entreprise ou module e-learning : chaque projet représente pour moi une
               rencontre et une expérience humaine unique.
             </p>
-            <p className="font-sans text-sm md:text-base text-cream/90 leading-relaxed">
+            <p className="text-base md:text-lg text-cream/90 leading-relaxed">
               Ma voix est souvent décrite comme chaleureuse, captivante et incarnée. J&apos;accorde
               une attention particulière à la compréhension d&apos;un texte, à son rythme, à sa
               musicalité et à l&apos;émotion qu&apos;il porte. Mon objectif est simple : offrir une
               interprétation sincère, vivante et fidèle à l&apos;intention de l&apos;auteur ou du
               client.
             </p>
-            <p className="font-sans text-sm md:text-base text-cream/90 leading-relaxed">
+            <p className="text-base md:text-lg text-cream/90 leading-relaxed">
               Cette envie de faire vivre les textes m&apos;a naturellement conduite à me former à la
               narration de livres audio auprès de Mathieu Buscatto, lauréat du Prix Audiolib 2025,
               ainsi qu&apos;à la voix off auprès de Julie Bataille, ancienne voix des Guignols de
               l&apos;Info. En 2026, j&apos;ai également obtenu le 3e Prix du casting « La Voix » lors
               du Festival du Livre Audio de Strasbourg.
             </p>
-            <p className="font-sans text-sm md:text-base text-cream/90 leading-relaxed">
+            <p className="text-base md:text-lg text-cream/90 leading-relaxed">
               Professionnelle et réactive, je sais m&apos;adapter facilement et je m&apos;investis
               pleinement dans chaque projet. Mon ouverture d&apos;esprit me permet d&apos;aborder avec
               la même curiosité tous les types de textes et d&apos;univers, même ceux qui sont
