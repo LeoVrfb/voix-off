@@ -20,9 +20,9 @@ const audiobookTracks = [
 
 const voiceoverTracks = [
   { id: 'vo-1', title: 'Prada', category: 'Publicité', duration: '0:18', src: '/demos/audio/prada.m4a', cover: '/demos/covers/prada.jpg' },
+  { id: 'vo-5', title: 'Sans Complexe', category: 'Publicité', duration: '0:25', src: '/demos/audio/sans-complexe.m4a', cover: '/demos/covers/sans-complexe.jpeg' },
   { id: 'vo-2', title: 'Banque Populaire', category: 'Publicité', duration: '1:08', src: '/demos/audio/banque-populaire.m4a', cover: '/demos/covers/banque-populaire.png' },
   { id: 'vo-3', title: 'Top Chef', category: 'Télévision', duration: '0:06', src: '/demos/audio/top-chef.m4a', cover: '/demos/covers/top-chef.jpg' },
-  { id: 'vo-4', title: 'Carrefour', category: 'Publicité', duration: '0:41', src: '/demos/audio/carrefour.m4a', cover: '/demos/covers/carrefour.jpg' },
 ]
 
 export default function MetsDesMots() {
