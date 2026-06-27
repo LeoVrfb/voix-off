@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Send, CheckCircle, Mail, MapPin, Clock, ExternalLink } from 'lucide-react'
+import { Send, CheckCircle, Mail, MapPin, Clock, ChevronRight } from 'lucide-react'
 import BlurRevealText from '@/components/ui/BlurRevealText'
 import {
   Select,
@@ -330,12 +330,35 @@ export default function Contact() {
               href="https://leohengebaert.fr"
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative inline-flex items-center gap-2 overflow-hidden px-4 py-1.5 rounded-full border border-raspberry/30 bg-cream/[0.04] text-[11px] font-sans tracking-[0.08em] hover:border-raspberry/60 hover:bg-cream/[0.07] transition-all duration-300"
+              aria-label="Cliquer pour visiter — Site réalisé par Léo Hengebaert, leohengebaert.fr"
+              className="group inline-flex items-center gap-2.5"
             >
-              <span className="animate-shimmer-signature absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-raspberry/25 to-transparent pointer-events-none" />
-              <span className="text-cream/60 group-hover:text-cream/80 transition-colors">Site réalisé par</span>
-              <span className="text-raspberry font-semibold group-hover:text-raspberry/90 transition-colors">leohengebaert.fr</span>
-              <ExternalLink className="h-3 w-3 text-raspberry/70 group-hover:text-raspberry transition-colors" />
+              {/* CTA hors du bouton, à gauche */}
+              <span className="font-sans text-[11px] font-medium tracking-wide text-cream/80 transition-colors group-hover:text-cream">
+                Cliquer pour visiter
+              </span>
+              {/* Chevrons pointant vers le bouton */}
+              <span className="flex items-center text-cream/80 transition-colors group-hover:text-cream">
+                <ChevronRight className="h-3.5 w-3.5 animate-signature-chevron [animation-delay:0ms]" />
+                <ChevronRight className="-ml-2 h-3.5 w-3.5 animate-signature-chevron [animation-delay:150ms]" />
+                <ChevronRight className="-ml-2 h-3.5 w-3.5 animate-signature-chevron [animation-delay:300ms]" />
+              </span>
+              {/* Le bouton */}
+              <span className="relative inline-flex items-center gap-2 overflow-hidden rounded-full border border-peach/40 bg-[#221912] px-4 py-2 shadow-[0_6px_18px_-4px_rgba(0,0,0,0.55),0_4px_20px_-8px_rgba(203,177,153,0.45)] transition-all duration-300 group-hover:-translate-y-0.5 group-hover:border-peach/75 group-hover:shadow-[0_12px_30px_-6px_rgba(0,0,0,0.6),0_14px_36px_-8px_rgba(203,177,153,0.85)]">
+                <span className="animate-signature-aurora pointer-events-none absolute inset-0 bg-[radial-gradient(120%_120%_at_0%_50%,rgba(203,177,153,0.30),transparent_55%),radial-gradient(120%_120%_at_100%_50%,rgba(236,229,220,0.22),transparent_55%)]" />
+                <span className="animate-signature-sweep pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-cream/60 to-transparent" />
+                <span className="animate-signature-sweep-thin pointer-events-none absolute inset-y-0 left-0 w-[14%] bg-gradient-to-r from-transparent via-peach/90 to-transparent" />
+                <span className="relative flex h-2 w-2 items-center justify-center">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-peach/70" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-peach" />
+                </span>
+                <span className="relative font-sans text-[11px] font-semibold tracking-[0.05em] text-cream/90 transition-colors group-hover:text-cream">
+                  Site réalisé par
+                </span>
+                <span className="relative bg-gradient-to-r from-[#ECE5DC] via-[#CBB199] to-[#ECE5DC] bg-clip-text font-sans text-[11px] font-bold tracking-[0.02em] text-transparent">
+                  leohengebaert.fr
+                </span>
+              </span>
             </a>
           </div>
         </div>
