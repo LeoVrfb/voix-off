@@ -320,3 +320,16 @@ input[type='range']::-webkit-slider-thumb:hover {
     page-break-inside: avoid;
   }
 }
+
+/* Signature footer — badge leohengebaert.fr */
+@keyframes shimmer-signature {
+  0% { transform: translateX(-100%) skewX(-15deg); opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateX(250%) skewX(-15deg); opacity: 0; }
+}
+
+.animate-shimmer-signature {
+  animation: shimmer-signature 2.5s ease-in-out infinite;
+  animation-delay: 0.8s;
+}

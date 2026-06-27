@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Send, CheckCircle, Mail, MapPin, Clock } from 'lucide-react'
+import { Send, CheckCircle, Mail, MapPin, Clock, ExternalLink } from 'lucide-react'
 import BlurRevealText from '@/components/ui/BlurRevealText'
 import {
   Select,
@@ -323,6 +323,20 @@ export default function Contact() {
             <p className="font-sans text-xs text-cream/65">
               © {new Date().getFullYear()} Tiffany Voix Off
             </p>
+          </div>
+
+          <div className="mt-8 flex justify-center">
+            <a
+              href="https://leohengebaert.fr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative inline-flex items-center gap-2 overflow-hidden px-4 py-1.5 rounded-full border border-raspberry/30 bg-cream/[0.04] text-[11px] font-sans tracking-[0.08em] hover:border-raspberry/60 hover:bg-cream/[0.07] transition-all duration-300"
+            >
+              <span className="animate-shimmer-signature absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-raspberry/25 to-transparent pointer-events-none" />
+              <span className="text-cream/60 group-hover:text-cream/80 transition-colors">Site réalisé par</span>
+              <span className="text-raspberry font-semibold group-hover:text-raspberry/90 transition-colors">leohengebaert.fr</span>
+              <ExternalLink className="h-3 w-3 text-raspberry/70 group-hover:text-raspberry transition-colors" />
+            </a>
           </div>
         </div>
       </footer>
